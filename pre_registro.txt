@@ -1,0 +1,36 @@
+Listo. Te dejé el **pre-registro descargable revisado** con mención explícita a las **pre-ejecuciones lingüísticas** como capa separada de pre-runtime, y además el markdown acotado de **propiedades sumergidas**: certidumbres, incertidumbres, esperables y pseudo-predicciones derivables del diseño.
+
+## Archivos
+
+[Pre-registro V1.1 con pre-ejecución lingüística](sandbox:/mnt/data/PREREG_TALM_TALON_NATIVE_MULTILINGUAL_MATRIX_V1_1_LINGUISTIC_PREEXEC.md)
+
+[SHA256 del pre-registro V1.1](sandbox:/mnt/data/PREREG_TALM_TALON_NATIVE_MULTILINGUAL_MATRIX_V1_1_LINGUISTIC_PREEXEC.sha256.txt)
+
+[Mapa acotado de propiedades sumergidas](sandbox:/mnt/data/SUBMERGED_PROPERTY_MAP_NATIVE_MULTILINGUAL_TALM_TALON_V1.md)
+
+[SHA256 del mapa de propiedades sumergidas](sandbox:/mnt/data/SUBMERGED_PROPERTY_MAP_NATIVE_MULTILINGUAL_TALM_TALON_V1.sha256.txt)
+
+[Bundle ZIP con todo](sandbox:/mnt/data/PREREG_NATIVE_MULTILINGUAL_PROTOCOL_AND_SUBMERGED_MAP_V1.zip)
+
+## Hashes principales
+
+```text
+PREREG_TALM_TALON_NATIVE_MULTILINGUAL_MATRIX_V1_1_LINGUISTIC_PREEXEC.md
+3cdf4b57bcc3b3a0485697c28662923c298da7070f6743f8dacbdd22557a58bc
+
+SUBMERGED_PROPERTY_MAP_NATIVE_MULTILINGUAL_TALM_TALON_V1.md
+77943710a8adbbf2b7f94349ca8379e36b44f4874998c3b7cd170a974b00ea5a
+
+PREREG_NATIVE_MULTILINGUAL_PROTOCOL_AND_SUBMERGED_MAP_V1.zip
+919b5473e4cd59179a9201d7efad2cb6dd872f217aadc1734736023c1308f29c
+```
+
+El pre-registro ahora distingue explícitamente:
+
+```text
+L0: simiente conceptual común
+L1: instanciación lingüística nativa — ERNIE / Falcon / Claude-Sonnet
+L2: ejecución runtime TALM/TALON — InternLM / Jais / Granite
+```
+
+Y el documento breve define “propiedades sumergidas” como expectativas latentes derivables del diseño, no como resultados ni emergencias post-hoc.
