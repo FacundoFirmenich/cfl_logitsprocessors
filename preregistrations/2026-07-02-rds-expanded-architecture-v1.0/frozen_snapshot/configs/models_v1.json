@@ -1,0 +1,29 @@
+{
+  "schema": "rds-model-registry-v1",
+  "models": [
+    {
+      "model_key": "qwen35_4b",
+      "model_id": "Qwen/Qwen3.5-4B",
+      "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "loader": "AutoModelForCausalLM",
+      "thinking_policy": "disable_and_verify",
+      "quantization": "nf4_double_fp16"
+    },
+    {
+      "model_key": "phi4_mini",
+      "model_id": "microsoft/Phi-4-mini-instruct",
+      "revision": "cfbefacb99257ffa30c83adab238a50856ac3083",
+      "loader": "AutoModelForCausalLM",
+      "thinking_policy": "not_applicable",
+      "quantization": "nf4_double_fp16"
+    },
+    {
+      "model_key": "gemma4_e4b",
+      "model_id": "google/gemma-4-E4B-it",
+      "revision": "fee6332c1abaafb77f6f9624236c63aa2f1d0187",
+      "loader": "AutoModelForImageTextToText",
+      "thinking_policy": "disable_and_verify",
+      "quantization": "nf4_double_fp16"
+    }
+  ]
+}

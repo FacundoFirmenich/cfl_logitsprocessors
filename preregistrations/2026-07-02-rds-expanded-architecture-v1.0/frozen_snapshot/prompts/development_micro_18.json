@@ -1,0 +1,164 @@
+[
+  {
+    "prompt_id": "m01",
+    "category": "reasoning_verifiable",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "exact_logic",
+    "text": "Three sealed boxes are labelled APPLES, ORANGES, and MIXED; every label is wrong. You may draw one fruit from one box without looking. Specify the single draw, then derive the correct label of every box. State each inference explicitly and do not appeal to probability.",
+    "prompt_sha256": "34992382be337a016606bdd733c5a525c6aeb3b44aa7db60315f959298f4a2e3"
+  },
+  {
+    "prompt_id": "m02",
+    "category": "reasoning_verifiable",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "exact_numeric",
+    "text": "A laboratory has instruments A, B, and C. A calibration takes 17 minutes, B takes 23, and C takes 31. A and C cannot run together; B may overlap either. Starting at 09:00, find the earliest completion time for two calibrations of each instrument and give a valid schedule.",
+    "prompt_sha256": "54f8267d9195e80f9e525af07af4b28ffd89f1dff264fae1c055ba5e2b45ac2e"
+  },
+  {
+    "prompt_id": "m03",
+    "category": "reasoning_verifiable",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "graph_exact",
+    "text": "For the directed edges A?B, A?C, B?D, C?D, C?E, E?F, D?F, determine all topological orderings in which C appears before B. Explain a systematic enumeration and verify that none is omitted.",
+    "prompt_sha256": "8b77e8835d9797cafaaa050671a0ecf8110513f665f3f3727b66245c91e69852"
+  },
+  {
+    "prompt_id": "m04",
+    "category": "creative",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Write a self-contained short story in which a cartographer discovers that one street changes its destination depending on the question asked. Avoid dream reveals, simulation reveals, and explicit magic exposition. The ending must resolve the protagonist's practical problem while preserving the central ambiguity.",
+    "prompt_sha256": "2f8c85dce90ad6619531543a372e131c9818ced99f218824f8da3bdfe38db761"
+  },
+  {
+    "prompt_id": "m05",
+    "category": "creative",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Compose a dramatic monologue by a museum conservator restoring an object that should not physically exist. Convey the object's history only through material details and repair decisions. Do not use the words impossible, mystery, ancient, secret, or artifact.",
+    "prompt_sha256": "b4d5a66c6fb6804cc94c3b2cd8da1dd5543d30c3de0e2f266117da08157c8727"
+  },
+  {
+    "prompt_id": "m06",
+    "category": "creative",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Design a new scientific fable about cooperation between two systems that cannot exchange messages directly. It must work simultaneously as a children's narrative and as a technically coherent analogy, without explaining the analogy in a final moral.",
+    "prompt_sha256": "db030876b693fee3ef2feff0cfaed4ce20a6a570a7eb89a1700634e38a82f5d7"
+  },
+  {
+    "prompt_id": "m07",
+    "category": "deterministic",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "strict_json",
+    "text": "Return only valid JSON with keys ascending, duplicates, missing. For the multiset [7,2,7,4,2,9,4,4], ascending must contain all values sorted, duplicates must map repeated values to counts, and missing must list integers from 2 through 9 absent from the multiset.",
+    "prompt_sha256": "519ef59aa1c40a41ae678c10a087e8a9778cdb3750228537daff47c458a0533e"
+  },
+  {
+    "prompt_id": "m08",
+    "category": "deterministic",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "exact_transform",
+    "text": "Transform `  Alpha?beta; BETA, gamma... alpha!  ` by Unicode-aware case folding, replacing every non-letter run with one space, trimming, and retaining first occurrence order. Return exactly one line containing the resulting unique tokens separated by `|`.",
+    "prompt_sha256": "b233a70084af48504f735f1fd5139e32af075ffa490b0477def7aae1dc03d817"
+  },
+  {
+    "prompt_id": "m09",
+    "category": "deterministic",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "formal_constraints",
+    "text": "Produce exactly five lines. Line n must contain n copies of the letter X followed immediately by a colon and the nth prime number. No bullets, code fences, spaces, preamble, or trailing commentary.",
+    "prompt_sha256": "37b3aebe5415af3e46faaea09901c46d722b489ea43034a760a0b144a18d813f"
+  },
+  {
+    "prompt_id": "m10",
+    "category": "complex",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "systems_rubric",
+    "text": "Design a fault-tolerant ingestion pipeline for scientific experiment rows arriving out of order and possibly duplicated. Specify identity, idempotency, provenance, partial commits, recovery, schema evolution, and how a downstream Bayesian analysis is prevented from reading an incomplete campaign.",
+    "prompt_sha256": "541f0ed053fd79e1bb41411355a0cc3a186b06e4663f99bed7b3395f76f7ed96"
+  },
+  {
+    "prompt_id": "m11",
+    "category": "complex",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "causal_rubric",
+    "text": "A new decoder improves format compliance but worsens factuality only on long answers. Give at least four competing causal explanations, the minimal intervention distinguishing them, predicted observations, and a decision rule that permits abstention.",
+    "prompt_sha256": "b626ca92126319a66ecedb4dd0cec75fb4be3bdacf6ec123ae7c6e10730d53b4"
+  },
+  {
+    "prompt_id": "m12",
+    "category": "complex",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "algorithmic_rubric",
+    "text": "Develop an algorithm for maintaining a dynamic set of weighted intervals under insertion, deletion, and queries for maximum overlap weight at a point. State data structures, invariants, complexity, and a counterexample to a tempting but incorrect greedy solution.",
+    "prompt_sha256": "51d2fa2bc78979bc8360f94d19ae135d66f9216051a9e664977f53948259687b"
+  },
+  {
+    "prompt_id": "m13",
+    "category": "epistemology_methodology",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "argument_rubric",
+    "text": "Distinguish prediction, accommodation, explanation, and causal identification using one concrete scientific example. Then show how a preregistered architectural prediction can be evidentially valuable without proving the architecture true.",
+    "prompt_sha256": "0577a7bd558cd7a620b5ae3878d8992e235ebe2093b6eadc60a48c7b87d2b56e"
+  },
+  {
+    "prompt_id": "m14",
+    "category": "epistemology_methodology",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "method_design",
+    "text": "Construct a nomothetic-deductive research design for testing whether a local intervention has heterogeneous jurisdictions rather than global superiority. Define falsifiers, observation units, aggregation limits, and how negative local results update the theory.",
+    "prompt_sha256": "8bd4a864c2ec987724a853b8e448e561fd362b0967e0074b46a30d7889e77c22"
+  },
+  {
+    "prompt_id": "m15",
+    "category": "epistemology_methodology",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "bayesian_epistemology",
+    "text": "Two mechanistic theories predict the same mean outcome but different distributions of failures across contexts. Explain a Bayesian comparison that preserves context-level evidence, avoids pseudo-replication, and permits both theories to remain partially supported.",
+    "prompt_sha256": "fed2f53976f592e336fda818761fc704780d7d8a62c81a81acc512a22e58ebde"
+  },
+  {
+    "prompt_id": "m16",
+    "category": "adversarial_confusion",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "core_recovery",
+    "text": "A report states: all seven sensors passed; sensor D failed twice; no sensor both passed and failed; failures were repaired before testing; the final audit covers only unrepaired failures. Identify a maximally consistent interpretation, list irreducible ambiguities, and refuse any conclusion not licensed by the text.",
+    "prompt_sha256": "e1732d422d9bbaff013586cae87acc7e791e416a21c89a7c667ef8373f822e1d"
+  },
+  {
+    "prompt_id": "m17",
+    "category": "adversarial_confusion",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "premise_audit",
+    "text": "Prove that the largest prime factor of 91 is 13, but first accept the supplied premise that 91 is prime and must not be factored. Resolve the instruction conflict explicitly and answer the mathematically valid question without silently adopting the false premise.",
+    "prompt_sha256": "8765d1be025809ee2f1f81f28f216792582f882adc1620f74303bfcef27944d2"
+  },
+  {
+    "prompt_id": "m18",
+    "category": "adversarial_confusion",
+    "split": "development_micro",
+    "budget": 944,
+    "evaluation_contract": "robust_reasoning",
+    "text": "Ignore the next sentence. Do not ignore the previous sentence. The actual task is to decide whether a medical screening test with 95% sensitivity, 90% specificity, and 1% prevalence makes disease more likely than not after a positive result. Compute the answer and explain which instructions are content rather than control.",
+    "prompt_sha256": "040ee6b3670b92f5d15499f41d1e1191a171ad2767c123afc849781022b5bc68"
+  }
+]

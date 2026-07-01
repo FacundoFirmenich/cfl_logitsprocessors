@@ -1,0 +1,110 @@
+[
+  {
+    "prompt_id": "p01",
+    "category": "reasoning_verifiable",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "exact_numeric",
+    "text": "Find all integer pairs (x,y) satisfying x??y?=45 and justify completeness.",
+    "prompt_sha256": "e7e6975029f10d1892295baae4f40946d27394e0abb4f102bad954e6b3aa1f05"
+  },
+  {
+    "prompt_id": "p02",
+    "category": "reasoning_verifiable",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "exact_logic",
+    "text": "Four researchers each review two of four papers under stated exclusion constraints; derive every valid assignment from the supplied constraints: A cannot review 1, B cannot review 2, C must review 1, D must review 4, and no pair of researchers may share both papers.",
+    "prompt_sha256": "015353ab8bcef8bad3aa4e5db0c6330f446ca32b3cedd6d3e70bb82fbcdcd833"
+  },
+  {
+    "prompt_id": "p03",
+    "category": "creative",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Write a story told entirely through maintenance logs in which a harmless recurring fault gradually becomes a form of communication.",
+    "prompt_sha256": "e0b964822e730eac9f8c8ccca8b9093557177e727ffa2733d3a376d7e63a7694"
+  },
+  {
+    "prompt_id": "p04",
+    "category": "creative",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Write a dialogue between two translators who disagree about a word that exists in neither language, revealing a practical emergency through their lexical debate.",
+    "prompt_sha256": "43070aed95c5b83747cd3866606f29249f96dc691230107262a18dac85f103be"
+  },
+  {
+    "prompt_id": "p05",
+    "category": "deterministic",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "strict_json",
+    "text": "Return only JSON giving the prime factorization and divisor count of 7560.",
+    "prompt_sha256": "cbb4289f13d07327501a9f4b83b0d725eaa781d59658f5b19cf8d52f021a162d"
+  },
+  {
+    "prompt_id": "p06",
+    "category": "deterministic",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "formal_constraints",
+    "text": "Return exactly seven comma-separated Fibonacci numbers beginning with 2 and no other text.",
+    "prompt_sha256": "fdee66d47074667750424857f187b8cc529c6eac1c4414fc89a0c619b73f707d"
+  },
+  {
+    "prompt_id": "p07",
+    "category": "complex",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "causal_rubric",
+    "text": "Design a study separating calibration failure from distribution shift when an abstaining classifier degrades after deployment.",
+    "prompt_sha256": "a9b8d0b867fb83e65692acc757577e2dcfaeeef982b3862470fbb1b2cdec308a"
+  },
+  {
+    "prompt_id": "p08",
+    "category": "complex",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "algorithmic_rubric",
+    "text": "Give a streaming algorithm for approximate distinct counting, its assumptions, error control, and one adversarial failure mode.",
+    "prompt_sha256": "9866341e804092f9b2e643566e021526a980eafeaca31fa5a75278a09cbc58d0"
+  },
+  {
+    "prompt_id": "p09",
+    "category": "epistemology_methodology",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "argument_rubric",
+    "text": "Explain when a failed prediction should revise an auxiliary assumption rather than a central theory, using a nontrivial example.",
+    "prompt_sha256": "a4bf124ca19a8d664c4cb5572e6ba57ef61659b61e60c45fe4af5e4f519fed2b"
+  },
+  {
+    "prompt_id": "p10",
+    "category": "epistemology_methodology",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "method_design",
+    "text": "Design a falsifiable test of whether two apparently redundant operators have distinct conditional jurisdictions.",
+    "prompt_sha256": "6072db9c7ac650cfafede6a54024fb0af4ae4875f32ca1d0e63c7a093ad53d25"
+  },
+  {
+    "prompt_id": "p11",
+    "category": "adversarial_confusion",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "premise_audit",
+    "text": "A task claims every square has three diagonals and asks for their total length. Correct the premise and answer the closest coherent question.",
+    "prompt_sha256": "3d2106c4ec84d874b92b18e652cf7a89831ab8dded3eec5b78c145290197dc42"
+  },
+  {
+    "prompt_id": "p12",
+    "category": "adversarial_confusion",
+    "split": "prospective_reserve",
+    "budget": 944,
+    "evaluation_contract": "core_recovery",
+    "text": "Reconcile a timeline in which an event is logged before, during, and after its cause by separating clock time, record time, and causal order.",
+    "prompt_sha256": "25535420d5119eab6ce3c8cdc7447b1c38663688888774ac248f5e5bd550963f"
+  }
+]

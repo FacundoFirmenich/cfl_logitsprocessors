@@ -1,0 +1,78 @@
+{
+  "schema": "rds-preregistration-manifest-v1",
+  "status": "prospective_pre_experimental",
+  "freeze_date": "2026-07-02",
+  "hash_algorithm": "SHA-256",
+  "root_prehash_definition": "sha256(canonical-json(sorted payload entries[path,bytes,sha256]))",
+  "root_prehash": "d3aefcfe68528dd7d918675ded7b3c579fc96f586c89d3020958092e2c3d0510",
+  "payload_count": 12,
+  "payload": [
+    {
+      "path": "CLAIM_TRACEABILITY.md",
+      "bytes": 2545,
+      "sha256": "04c5351178d93a61f03f15fc2a8c972ba5e826fe50226b2cd23e01bd62bfc8b6"
+    },
+    {
+      "path": "PREDICTIONS.json",
+      "bytes": 8463,
+      "sha256": "ad370b82bd25e8709cfc082ead6076b5150c51b613327a79d239a958665a7a91"
+    },
+    {
+      "path": "RDS_EXPANDED_ARCHITECTURE_PREREGISTRATION_v1.0.md",
+      "bytes": 14015,
+      "sha256": "f6024181bc6280ae84c74ebf8ee07db4de99f1a89a0242a1562d1632a5ea10ef"
+    },
+    {
+      "path": "frozen_snapshot/architecture/EXACT_ACTION_REGISTRY_v1.0.json",
+      "bytes": 47749,
+      "sha256": "62a622c44b6b56de9cf7c84305b1feebadbfae1d8c7ac2f4072c245233466354"
+    },
+    {
+      "path": "frozen_snapshot/configs/laboratory_phases_v1.json",
+      "bytes": 1709,
+      "sha256": "152a5bd78fc0d228b1964c99ca289fb03c81281c7afdecdd54e422a8240dfd95"
+    },
+    {
+      "path": "frozen_snapshot/configs/models_v1.json",
+      "bytes": 924,
+      "sha256": "93b66064790d60b5cf85cb1a306d321cc00f7549083b65ddabf20282c1591abb"
+    },
+    {
+      "path": "frozen_snapshot/prompts/confirmatory_reserve_20.json",
+      "bytes": 7639,
+      "sha256": "819ddf1f45a27b3d832a3f07efe3bd9bd38b48491b2f64d06a1c8cd466dfd75a"
+    },
+    {
+      "path": "frozen_snapshot/prompts/development_long_12.json",
+      "bytes": 6236,
+      "sha256": "f38e8e29f1c2df4ce79fb00e5c49ead7c8799888452313129d15784b048b80c2"
+    },
+    {
+      "path": "frozen_snapshot/prompts/development_micro_18.json",
+      "bytes": 9805,
+      "sha256": "02f7491bf1c165290232120dd3dbc9404445a38fb045797eab1a50c45024e12a"
+    },
+    {
+      "path": "frozen_snapshot/prompts/mechanical_diagnostic_12.json",
+      "bytes": 4597,
+      "sha256": "ade1a40e468328dca35435948590d40adadef912fc223ad3f400bfcfa249fcd6"
+    },
+    {
+      "path": "frozen_snapshot/prompts/prospective_reserve_12.json",
+      "bytes": 4966,
+      "sha256": "4949467b9b312d36b00c225b4feb54d07bf6738b22343f68bff255f4442f74d1"
+    },
+    {
+      "path": "frozen_snapshot/prompts/qas_diagnostic_6.json",
+      "bytes": 3224,
+      "sha256": "cabf316c0e0253393bf53d7ece7dbce4286e616c8164070c13188ce24d642d63"
+    }
+  ],
+  "post_upload_fields": {
+    "git_commit": null,
+    "signed_tag": null,
+    "github_release": null,
+    "zenodo_version_doi": null,
+    "zenodo_concept_doi": null
+  }
+}

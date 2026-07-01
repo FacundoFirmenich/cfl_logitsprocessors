@@ -1,0 +1,191 @@
+{
+  "schema": "rds-preregistered-predictions-v1",
+  "count": 37,
+  "predictions": [
+    {
+      "prediction_id": "H01",
+      "label": "TALON projection",
+      "statement": "every contract-bearing TALON execution preserves final top-1. Any violation blocks the implementation/cell."
+    },
+    {
+      "prediction_id": "H02",
+      "label": "TALM crossings",
+      "statement": "TALM usually preserves top-1 in many contexts but permits nonzero intentional crossings; crossings are logged, never repaired."
+    },
+    {
+      "prediction_id": "H03",
+      "label": "pillar response",
+      "statement": "`talon_mass_right` shows coherent nonzero mechanical response across all three models more often than left/balanced TALON probes; this is not universal utility."
+    },
+    {
+      "prediction_id": "H04",
+      "label": "complementarity",
+      "statement": "`talm_mass_right_soft` supplies nonredundant response or utility cells beyond fixed `talon_mass_right`."
+    },
+    {
+      "prediction_id": "H05",
+      "label": "activity != utility",
+      "statement": "utility is not monotone in intervention intensity; some highly active cells are neutral or harmful."
+    },
+    {
+      "prediction_id": "H06",
+      "label": "Top-H/TFS nonredundancy",
+      "statement": "their masks/fingerprints differ contextually."
+    },
+    {
+      "prediction_id": "H07",
+      "label": "C/F/R informativeness",
+      "statement": "consensus core, disagreement frontier, and jointly discarded residual differ on at least one registered mechanical/decisional axis."
+    },
+    {
+      "prediction_id": "H08",
+      "label": "frontier uncertainty",
+      "statement": "frontier mass/instability associates with branch disagreement or route uncertainty and may increase Top-2 value."
+    },
+    {
+      "prediction_id": "H09",
+      "label": "BZ/ZX exactness",
+      "statement": "partitions are disjoint, conserve mass, and allocate .0025/.05 up to tolerance with fractional boundaries."
+    },
+    {
+      "prediction_id": "H10",
+      "label": "portability with heterogeneity",
+      "statement": "mechanisms remain numerically stable in all three architectures, while magnitudes and useful jurisdictions remain model-dependent."
+    },
+    {
+      "prediction_id": "H11",
+      "label": "no global champion",
+      "statement": "fresh data retain local win/tie/loss/baseline-abstention/out-of-support regions; apparent universality triggers audit."
+    },
+    {
+      "prediction_id": "H12",
+      "label": "fixed-pillar boundary",
+      "statement": "`talon_mass_right` is a strong comparator, but reserve cells exist where baseline or another admitted action is preferable."
+    },
+    {
+      "prediction_id": "H13",
+      "label": "complementary RDS",
+      "statement": "calibrated abstention-aware RDS exploits some nonredundant cells beyond the fixed pillar; failure is reported, not rescued."
+    },
+    {
+      "prediction_id": "H14",
+      "label": "native external duality",
+      "statement": "Top-H/TFS may be more useful as delimiters/probes than frequent generators; native status predicts no route frequency."
+    },
+    {
+      "prediction_id": "H15",
+      "label": "full vs internal-only RDS",
+      "statement": "Top-H/TFS fingerprints/authority improve at least one held-out property: calibration, abstention, support, Top-2 coverage, or false-positive control; unconditional mean is not the target."
+    },
+    {
+      "prediction_id": "H16",
+      "label": "model heterogeneity",
+      "statement": "action ordering and abstention differ across Qwen/Phi/Gemma; Qwen priors require learned attenuation."
+    },
+    {
+      "prediction_id": "H17",
+      "label": "category heterogeneity",
+      "statement": "coherent categories have different useful-action/abstention profiles; category summaries beat pooled ranking descriptively."
+    },
+    {
+      "prediction_id": "H18",
+      "label": "long-context novelty",
+      "statement": "long heterodox prompts expose response, repetition, termination, coherence, or safety phenomena absent from 944-token microcartography."
+    },
+    {
+      "prediction_id": "H19",
+      "label": "conditional QAS fidelity",
+      "statement": "high for some action-context pairs, not universal; deployment requires a fidelity gate."
+    },
+    {
+      "prediction_id": "H20",
+      "label": "QAS efficiency",
+      "statement": "fidelity-admitted cells reduce support size, memory, latency, or compute proxy without breaching tolerance."
+    },
+    {
+      "prediction_id": "H21",
+      "label": "Z_post limits",
+      "statement": "Z_post predicts response/support better than semantic utility unless combined with independent semantic evidence."
+    },
+    {
+      "prediction_id": "H22",
+      "label": "Z_post transfer",
+      "statement": "some development jurisdictions transfer to fresh prompts better than unconditioned global rankings; otherwise remain retrospective."
+    },
+    {
+      "prediction_id": "H23",
+      "label": "delayed learning",
+      "statement": "OBL changes later route probabilities/lifecycle while base weights and revision hashes remain fixed."
+    },
+    {
+      "prediction_id": "H24",
+      "label": "no leakage",
+      "statement": "current outputs/Z_post never influence their already frozen route."
+    },
+    {
+      "prediction_id": "H25",
+      "label": "hierarchical transfer",
+      "statement": "partial pooling with learned attenuation improves at least one held-out calibration criterion over branch-independent or unchanged-Qwen transfer."
+    },
+    {
+      "prediction_id": "H26",
+      "label": "typed evidence",
+      "statement": "six-axis modelling improves calibration or error localization over scalar success updates."
+    },
+    {
+      "prediction_id": "H27",
+      "label": "dynamic controller",
+      "statement": "full dynamic hierarchy improves at least one held-out decision/calibration criterion over static priors without exceeding harm tolerance."
+    },
+    {
+      "prediction_id": "H28",
+      "label": "abstention",
+      "statement": "uncertainty/harm gates yield nonzero abstention and reduce unsupported interventions versus forced selection."
+    },
+    {
+      "prediction_id": "H29",
+      "label": "hysteresis",
+      "statement": "reduces lifecycle thrashing versus matched single-threshold logic."
+    },
+    {
+      "prediction_id": "H30",
+      "label": "bench reentry",
+      "statement": "at least one branch may recover after material context shift; inability to reevaluate makes bench archival."
+    },
+    {
+      "prediction_id": "H31",
+      "label": "NF4 boundary",
+      "statement": "exact invariants and qualitative signatures survive NF4; utility magnitudes and routes may differ from BF16."
+    },
+    {
+      "prediction_id": "H32",
+      "label": "reproducibility",
+      "statement": "identical frozen inputs reproduce deterministic contracts, static hashes, row keys, and completeness counts; stochastic text identity is required only where the runtime guarantees it."
+    },
+    {
+      "prediction_id": "H33",
+      "label": "BZ rare-yield structure",
+      "statement": "BZ has low win frequency, high variance, high leverage conditional on a win, and heavier-tailed local utility than ZX or ordinary truncators."
+    },
+    {
+      "prediction_id": "H34",
+      "label": "ZX coverage",
+      "statement": "ZX increases residual-shell coverage and reduces repeated visitation of identical residual bands relative to matched ordinary sampling."
+    },
+    {
+      "prediction_id": "H35",
+      "label": "BZ/ZX contrast",
+      "statement": "BZ produces fewer useful events, more extreme rank movement, larger conditional trajectory change, and greater failure risk than broader ZX exploration."
+    },
+    {
+      "prediction_id": "H36",
+      "label": "structured-Z controls",
+      "statement": "active BZ must outperform equal-mass random reallocation on its registered rare-yield target, and ZX must outperform shuffled residual reallocation on coverage; otherwise the corresponding mechanism is falsified."
+    },
+    {
+      "prediction_id": "H37",
+      "label": "structural scale covariance",
+      "statement": "the macro-to-micro role map is supported only if branch autonomy, heteropolarity, higher-order authority, abstention, generation/arbitration separation, and delayed post-hoc learning are operationally measurable invariants; failure to operationalize them falsifies this claim."
+    }
+  ]
+}

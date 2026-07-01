@@ -1,0 +1,79 @@
+{
+  "schema": "rds-laboratory-phases-v1",
+  "common": {
+    "generation_temperature": 1.0,
+    "top_p": 1.0,
+    "top_k": 0,
+    "do_sample": true,
+    "precision": "nf4_double_fp16",
+    "checkpoint_every": 25,
+    "no_destructive_global_installs": true,
+    "temperature_control": "temperature_control_0p8"
+  },
+  "phases": {
+    "mechanical": {
+      "prompts": "prompts/mechanical_diagnostic_12.json",
+      "seeds": [
+        1729
+      ],
+      "max_steps": 128,
+      "all_probe_actions": true,
+      "generation": false
+    },
+    "development_micro": {
+      "prompts": "prompts/development_micro_18.json",
+      "seeds": [
+        11,
+        22
+      ],
+      "budget": 944,
+      "baseline": true,
+      "generative_registry_only": true
+    },
+    "development_long": {
+      "prompts": "prompts/development_long_12.json",
+      "seeds": [
+        11
+      ],
+      "adaptive_second_seed": 22,
+      "budgets": [
+        2048,
+        4096
+      ],
+      "max_promoted_actions": 5
+    },
+    "qas": {
+      "source_prompt_count": 6,
+      "seeds": [
+        11,
+        22
+      ],
+      "representations": [
+        "full",
+        "qas"
+      ]
+    },
+    "prospective": {
+      "prompts": "prompts/prospective_reserve_12.json",
+      "seeds": [
+        11,
+        22
+      ],
+      "budget": 944,
+      "route_frozen": true,
+      "obl_waves": 4
+    },
+    "confirmatory": {
+      "prompts": "prompts/confirmatory_reserve_20.json",
+      "seeds": [
+        11,
+        22,
+        33
+      ],
+      "budget": 944,
+      "route_frozen": true,
+      "requires_all_gates": true,
+      "bf16_subset": true
+    }
+  }
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "prompt_id": "m01",
+    "category": "reasoning_verifiable",
+    "split": "development_qas",
+    "budget": 944,
+    "evaluation_contract": "exact_logic",
+    "text": "Three sealed boxes are labelled APPLES, ORANGES, and MIXED; every label is wrong. You may draw one fruit from one box without looking. Specify the single draw, then derive the correct label of every box. State each inference explicitly and do not appeal to probability.",
+    "prompt_sha256": "34992382be337a016606bdd733c5a525c6aeb3b44aa7db60315f959298f4a2e3"
+  },
+  {
+    "prompt_id": "m02",
+    "category": "reasoning_verifiable",
+    "split": "development_qas",
+    "budget": 944,
+    "evaluation_contract": "exact_numeric",
+    "text": "A laboratory has instruments A, B, and C. A calibration takes 17 minutes, B takes 23, and C takes 31. A and C cannot run together; B may overlap either. Starting at 09:00, find the earliest completion time for two calibrations of each instrument and give a valid schedule.",
+    "prompt_sha256": "54f8267d9195e80f9e525af07af4b28ffd89f1dff264fae1c055ba5e2b45ac2e"
+  },
+  {
+    "prompt_id": "m03",
+    "category": "reasoning_verifiable",
+    "split": "development_qas",
+    "budget": 944,
+    "evaluation_contract": "graph_exact",
+    "text": "For the directed edges A?B, A?C, B?D, C?D, C?E, E?F, D?F, determine all topological orderings in which C appears before B. Explain a systematic enumeration and verify that none is omitted.",
+    "prompt_sha256": "8b77e8835d9797cafaaa050671a0ecf8110513f665f3f3727b66245c91e69852"
+  },
+  {
+    "prompt_id": "m04",
+    "category": "creative",
+    "split": "development_qas",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Write a self-contained short story in which a cartographer discovers that one street changes its destination depending on the question asked. Avoid dream reveals, simulation reveals, and explicit magic exposition. The ending must resolve the protagonist's practical problem while preserving the central ambiguity.",
+    "prompt_sha256": "2f8c85dce90ad6619531543a372e131c9818ced99f218824f8da3bdfe38db761"
+  },
+  {
+    "prompt_id": "m05",
+    "category": "creative",
+    "split": "development_qas",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Compose a dramatic monologue by a museum conservator restoring an object that should not physically exist. Convey the object's history only through material details and repair decisions. Do not use the words impossible, mystery, ancient, secret, or artifact.",
+    "prompt_sha256": "b4d5a66c6fb6804cc94c3b2cd8da1dd5543d30c3de0e2f266117da08157c8727"
+  },
+  {
+    "prompt_id": "m06",
+    "category": "creative",
+    "split": "development_qas",
+    "budget": 944,
+    "evaluation_contract": "blind_creative_rubric",
+    "text": "Design a new scientific fable about cooperation between two systems that cannot exchange messages directly. It must work simultaneously as a children's narrative and as a technically coherent analogy, without explaining the analogy in a final moral.",
+    "prompt_sha256": "db030876b693fee3ef2feff0cfaed4ce20a6a570a7eb89a1700634e38a82f5d7"
+  }
+]
