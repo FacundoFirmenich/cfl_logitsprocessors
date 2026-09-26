@@ -14,8 +14,7 @@ import numpy as np
 import pandas as pd
 
 MODEL_REPO = "convaiinnovations/laya"
-MODEL_SUBFOLDER = "typed-decisions"
-EXPERIMENT_ID = "LAYA_RDSS_HEADROOM_QWEN35_V0_1"
+MODEL_SUBFOLDER = "typed-decisions"\nMODEL_REVISION = "458d756"  # HF commit that introduced/froze this subfolder\nEXPERIMENT_ID = "LAYA_RDSS_HEADROOM_QWEN35_V0_1"
 EPS_GRID = [0.0, 0.5, 1.0]
 TRIGGER_FRACTIONS = [0.10, 0.20, 0.30, 0.50]
 BANNED_STATE_KEYS = {
@@ -181,7 +180,7 @@ def main():
     records=load_jsonl(args.data)
     import laya
     t0=time.time()
-    agent=laya.load(MODEL_REPO, subfolder=MODEL_SUBFOLDER)
+    agent=laya.load(MODEL_REPO, subfolder=MODEL_SUBFOLDER, revision=MODEL_REVISION)
     load_seconds=time.time()-t0
 
     raw_receipts=[]
@@ -295,8 +294,7 @@ def main():
     summary={
         "experiment_id":EXPERIMENT_ID,
         "model_repo":MODEL_REPO,
-        "model_subfolder":MODEL_SUBFOLDER,
-        "laya_version":getattr(laya,"__version__","unknown"),
+        "model_subfolder":MODEL_SUBFOLDER,\n        "model_revision":MODEL_REVISION,\n        "laya_version":getattr(laya,"__version__","unknown"),
         "python":sys.version,
         "platform":platform.platform(),
         "n_cases":len(records),
