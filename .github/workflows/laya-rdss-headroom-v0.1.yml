@@ -7,6 +7,12 @@ on:
     paths:
       - "experiments/laya_rdss_headroom_v0_1/**"
       - ".github/workflows/laya-rdss-headroom-v0.1.yml"
+  pull_request:
+    branches:
+      - "Ulalito's-Island"
+    paths:
+      - "experiments/laya_rdss_headroom_v0_1/**"
+      - ".github/workflows/laya-rdss-headroom-v0.1.yml"
   workflow_dispatch:
 
 permissions:
