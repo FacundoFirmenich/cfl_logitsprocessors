@@ -1,0 +1,11 @@
+{
+  "adjudicable_only": true,
+  "checkpoint_csv_sha256": "aaddb736d4c8d052e925bb18dee07fb17c248553278dcd1a7ec85659ba446996",
+  "derived_jsonl_sha256": "6b7ed236a68ce37f394d639726e6aafc5813aed01f06fc427cfa53a71e51d3ea",
+  "experiment": "qwen35_base_v3",
+  "human_default_family": "TALON",
+  "important_boundary": "All fields under evaluation_only are withheld from Laya state construction and used only after inference for scoring.",
+  "master_csv_sha256": "f5beaff85936a65f03d4d8267f6ce3654281b7640690433163e187cba5c5ec71",
+  "n_cases": 18,
+  "schema": "LAYA_RDSS_HEADROOM_DATASET_0.1"
+}
