@@ -241,8 +241,7 @@ def main():
     pred.to_csv(args.out/"predictions.csv",index=False)
     with (args.out/"raw_receipts.jsonl").open("w",encoding="utf-8") as f:
         for r in raw_receipts:
-            f.write(json.dumps(r,sort_keys=True,ensure_ascii=False)+"
-")
+            f.write(json.dumps(r,sort_keys=True,ensure_ascii=False)+"\\n")
 
     metrics=[]
     for abl,g in pred.groupby("ablation"):
