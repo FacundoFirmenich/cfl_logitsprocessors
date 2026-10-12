@@ -1,0 +1,60 @@
+name: CFL Macro P-C Gate v0.5
+
+on:
+  pull_request:
+    branches:
+      - "Ulalito's-Island"
+    paths:
+      - "experiments/macro_pc_v05/**"
+      - ".github/workflows/cfl_macro_pc_v05.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  macro-pc-v05:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install CPU PyTorch
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+
+      - name: Install Transformers
+        run: |
+          pip install transformers==4.57.1 safetensors==0.6.2
+
+      - name: Execute real macro P-C gate
+        run: |
+          python experiments/macro_pc_v05/run_macro_pc_gate_v05.py \
+            --output-dir macro_pc_v05_artifact | tee macro_pc_v05_summary.json
+
+      - name: Show manifest
+        if: always()
+        run: |
+          if [ -f macro_pc_v05_artifact/manifest.json ]; then
+            cat macro_pc_v05_artifact/manifest.json
+          fi
+
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfl-macro-pc-v05-artifact
+          path: |
+            macro_pc_v05_artifact/
+            macro_pc_v05_summary.json
+          if-no-files-found: error
+          retention-days: 30
