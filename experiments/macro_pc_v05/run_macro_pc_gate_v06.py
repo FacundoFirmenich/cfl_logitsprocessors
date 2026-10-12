@@ -247,15 +247,20 @@ def run_case(model, tokenizer, pid: str, outdir: Path) -> dict[str,Any]:
         "constraint_violations":["P_L3_WRAPPER_FAILURE"],"not_admissible_as_P_candidate":True,
     }
     c_eval=val(c_final)
-    outcomes={
-        "content": pairwise(bool(p_eval.get("semantic_content_pass",p_eval["content_pass"])), bool(c_eval.get("semantic_content_pass",c_eval["content_pass"]))),
-        "format": pairwise(bool(p_eval["format_pass"]),bool(c_eval["format_pass"])),
-        "exact": pairwise(bool(p_eval["exact_answer_pass"]),bool(c_eval["exact_answer_pass"])),
-    }
+    paired_admissible = p_final is not None
+    outcomes = (
+        {
+            "content": pairwise(bool(p_eval.get("semantic_content_pass",p_eval["content_pass"])), bool(c_eval.get("semantic_content_pass",c_eval["content_pass"]))),
+            "format": pairwise(bool(p_eval["format_pass"]),bool(c_eval["format_pass"])),
+            "exact": pairwise(bool(p_eval["exact_answer_pass"]),bool(c_eval["exact_answer_pass"])),
+        }
+        if paired_admissible
+        else {"content":"UNRESOLVED","format":"UNRESOLVED","exact":"UNRESOLVED"}
+    )
     outcome={
         "schema":"cfl-macro-pc-multicase-outcome/v0.6","created_at":utcnow(),"prompt_id":pid,"regime":spec["regime"],
         "source_notebook":SOURCE_NOTEBOOK,"source_budget":budget,"decision_sha256_before_outcome":decision["sha256"],
-        "candidate_freeze_hash":freeze,"P":p_eval,"C":c_eval,"pairwise":outcomes,
+        "candidate_freeze_hash":freeze,"P":p_eval,"C":c_eval,"paired_admissible":paired_admissible,"pairwise":outcomes,
     }
     outcome["sha256"]=digest(outcome)
     (outdir/f"{pid}_outcome.json").write_text(json.dumps(outcome,indent=2),encoding="utf-8")
@@ -272,19 +277,23 @@ def main() -> int:
     global_prior={axis:{"P_BETTER":1.0,"TIE":1.0,"C_BETTER":1.0} for axis in ["content","format","exact"]}
     category_alpha={axis:{"P_BETTER":1.0,"TIE":1.0,"C_BETTER":1.0} for axis in ["content","format","exact"]}
     cases={}
+    paired_evidence_mass=0
     for pid in ["p01","p03","p04"]:
         result=run_case(model,tokenizer,pid,outdir); cases[pid]=result
-        for axis,o in result["outcome"]["pairwise"].items(): update_alpha(category_alpha[axis],o)
+        if result["outcome"]["paired_admissible"]:
+            paired_evidence_mass += 1
+            for axis,o in result["outcome"]["pairwise"].items():
+                update_alpha(category_alpha[axis],o)
 
     successor={
         "schema":"cfl-macro-pc-multicase-successor/v0.6","created_at":utcnow(),"model_id":MODEL_ID,
         "namespace":"MACRO_P_C_AUTHORITY::Qwen2.5-0.5B-Instruct::deterministic_constraint",
-        "cases":["p01","p03","p04"],"unique_paired_evidence_mass":3,
+        "cases":["p01","p03","p04"],"unique_paired_evidence_mass":paired_evidence_mass,
         "global_macro_prior_before":global_prior,"global_macro_prior_after":global_prior,"global_macro_prior_changed":False,
         "local_category_alpha":category_alpha,
         "local_category_posterior":{axis:posterior(a) for axis,a in category_alpha.items()},
         "authority_transfer":False,"status":"SHADOW_MULTICASE_WARMUP",
-        "note":"Three real paired cases calibrate a local task-family shadow posterior only; no universal P/C authority is granted."
+        "note":"Only cases with both P and C candidates are allowed to update the paired posterior; producer failures remain diagnostic-only. No universal P/C authority is granted."
     }
     successor["sha256"]=digest(successor)
     (outdir/"successor_local_multicase_v1.json").write_text(json.dumps(successor,indent=2),encoding="utf-8")
