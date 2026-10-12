@@ -1,0 +1,69 @@
+name: TALAMO Fresh80 — Self-hosted GPU
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_name:
+        description: "One of TALM_Qwen35_2B_FRESH80, TALON_Qwen35_2B_FRESH80, TALM_Gemma4_E2B_FRESH80, TALON_Gemma4_E2B_FRESH80"
+        required: true
+        default: "TALM_Qwen35_2B_FRESH80"
+        type: choice
+        options:
+          - TALM_Qwen35_2B_FRESH80
+          - TALON_Qwen35_2B_FRESH80
+          - TALM_Gemma4_E2B_FRESH80
+          - TALON_Gemma4_E2B_FRESH80
+      notebook_path:
+        description: "Notebook to execute"
+        required: true
+        default: "notebooks/TALM_Qwen35_2B_FRESH80.ipynb"
+        type: string
+
+jobs:
+  run-fresh80:
+    runs-on: [self-hosted, linux, x64, gpu]
+    timeout-minutes: 1440
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preflight fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${{ inputs.notebook_path }}" || { echo "Missing notebook ${{ inputs.notebook_path }}"; exit 20; }
+          test -f prompts/FRESH80_prompts_v1.json || { echo "Missing prompts/FRESH80_prompts_v1.json"; exit 21; }
+          test -d src || { echo "Missing src/ package tree"; exit 22; }
+          nvidia-smi || { echo "GPU not visible"; exit 23; }
+
+      - name: Prepare Python
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if test -f requirements.txt; then python -m pip install -r requirements.txt; fi
+          python -m pip install papermill nbconvert ipykernel
+
+      - name: Execute notebook
+        shell: bash
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          TALAMO_JOB_NAME: ${{ inputs.job_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p results/fresh80/notebook_runs
+          papermill "${{ inputs.notebook_path }}" "results/fresh80/notebook_runs/${{ inputs.job_name }}.executed.ipynb"
+
+      - name: Create checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/fresh80
+          find results/fresh80 -type f -print0 | sort -z | xargs -0 sha256sum > results/fresh80/SHA256SUMS.txt
+
+      - name: Upload Fresh80 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.job_name }}-fresh80-results
+          path: results/fresh80
+          retention-days: 30
