@@ -1,4 +1,4 @@
-name: CFL Macro P-C Gate v0.5.2
+name: CFL Macro P-C Multicase Gate v0.6
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  macro-pc-v052:
+  macro-pc-v06:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -36,39 +36,27 @@ jobs:
         run: |
           pip install transformers==4.57.1 safetensors==0.6.2
 
-      - name: Execute admissible p01 macro P-C gate
+      - name: Execute real multicase macro P-C gate
         run: |
-          python experiments/macro_pc_v05/run_macro_pc_gate_v052.py \
-            --output-dir macro_pc_v052_artifact | tee macro_pc_v052_summary.json
+          python experiments/macro_pc_v05/run_macro_pc_gate_v06.py | tee macro_pc_v06_summary.json
 
-      - name: Show frozen candidates, outcome, successor and manifest
+      - name: Show summary and frozen outcomes
         if: always()
         run: |
+          cat macro_pc_v06_summary.json || true
           python - <<'PY'
-          import json
           from pathlib import Path
-          root = Path("macro_pc_v052_artifact")
-          if (root / "candidates.json").exists():
-              c = json.loads((root / "candidates.json").read_text())
-              print("=== L1 ===")
-              print(c["P"]["L1"]["text"])
-              print("=== L2 ===")
-              print(c["P"]["L2"]["text"])
-              print("=== L3 RAW RESPONSE ===")
-              print(c["P"]["L3"]["text"])
-              print("=== P FINAL / INFORMED ===")
-              print(c["P"]["final_text"])
-              print("=== C FINAL ===")
-              print(c["C"]["final_text"])
-          for fn, label in [
-              ("decision_frozen.json","DECISION"),
-              ("outcome_exact.json","OUTCOME"),
-              ("successor_model_v1.json","SUCCESSOR"),
-              ("manifest.json","MANIFEST"),
-          ]:
-              p = root / fn
+          root = Path("macro_pc_v06_artifact")
+          for pid in ["p01","p03","p04"]:
+              for suffix in ["candidates","decision_frozen","outcome"]:
+                  p = root / f"{pid}_{suffix}.json"
+                  if p.exists():
+                      print(f"=== {p.name} ===")
+                      print(p.read_text())
+          for fn in ["successor_local_multicase_v1.json","z_post_multicase.json","manifest.json"]:
+              p=root/fn
               if p.exists():
-                  print(f"=== {label} ===")
+                  print(f"=== {fn} ===")
                   print(p.read_text())
           PY
 
@@ -76,9 +64,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cfl-macro-pc-v052-artifact
+          name: cfl-macro-pc-v06-artifact
           path: |
-            macro_pc_v052_artifact/
-            macro_pc_v052_summary.json
+            macro_pc_v06_artifact/
+            macro_pc_v06_summary.json
           if-no-files-found: error
           retention-days: 30
