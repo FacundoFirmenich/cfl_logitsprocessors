@@ -1,4 +1,4 @@
-name: CFL Macro P-C Multicase Gate v0.6
+name: CFL Macro P-C Two-Phase L3 Gate v0.7
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  macro-pc-v06:
+  macro-pc-v07:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -36,37 +36,26 @@ jobs:
         run: |
           pip install transformers==4.57.1 safetensors==0.6.2
 
-      - name: Execute real multicase macro P-C gate
+      - name: Execute two-phase L3 producer fidelity gate
         run: |
-          python experiments/macro_pc_v05/run_macro_pc_gate_v06.py | tee macro_pc_v06_summary.json
+          python experiments/macro_pc_v05/run_macro_pc_gate_v07.py | tee macro_pc_v07_summary.json
 
-      - name: Show summary and frozen outcomes
+      - name: Show summary and manifest
         if: always()
         run: |
-          cat macro_pc_v06_summary.json || true
-          python - <<'PY'
-          from pathlib import Path
-          root = Path("macro_pc_v06_artifact")
-          for pid in ["p01","p03","p04"]:
-              for suffix in ["candidates","decision_frozen","outcome"]:
-                  p = root / f"{pid}_{suffix}.json"
-                  if p.exists():
-                      print(f"=== {p.name} ===")
-                      print(p.read_text())
-          for fn in ["successor_local_multicase_v1.json","z_post_multicase.json","manifest.json"]:
-              p=root/fn
-              if p.exists():
-                  print(f"=== {fn} ===")
-                  print(p.read_text())
-          PY
+          cat macro_pc_v07_summary.json || true
+          if [ -f macro_pc_v07_artifact/manifest.json ]; then
+            echo "=== MANIFEST ==="
+            cat macro_pc_v07_artifact/manifest.json
+          fi
 
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cfl-macro-pc-v06-artifact
+          name: cfl-macro-pc-v07-artifact
           path: |
-            macro_pc_v06_artifact/
-            macro_pc_v06_summary.json
+            macro_pc_v07_artifact/
+            macro_pc_v07_summary.json
           if-no-files-found: error
           retention-days: 30
