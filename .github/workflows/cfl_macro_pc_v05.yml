@@ -1,4 +1,4 @@
-name: CFL Macro P-C Gate v0.5.1
+name: CFL Macro P-C Gate v0.5.2
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  macro-pc-v051:
+  macro-pc-v052:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -36,42 +36,49 @@ jobs:
         run: |
           pip install transformers==4.57.1 safetensors==0.6.2
 
-      - name: Execute specification-clean macro P-C gate
+      - name: Execute admissible p01 macro P-C gate
         run: |
-          python experiments/macro_pc_v05/run_macro_pc_gate_v051.py \
-            --output-dir macro_pc_v051_artifact | tee macro_pc_v051_summary.json
+          python experiments/macro_pc_v05/run_macro_pc_gate_v052.py \
+            --output-dir macro_pc_v052_artifact | tee macro_pc_v052_summary.json
 
-      - name: Show candidate finals, manifest and exact outcome
+      - name: Show frozen candidates, outcome, successor and manifest
         if: always()
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          root = Path("macro_pc_v051_artifact")
+          root = Path("macro_pc_v052_artifact")
           if (root / "candidates.json").exists():
               c = json.loads((root / "candidates.json").read_text())
-              print("=== P FINAL ===")
+              print("=== L1 ===")
+              print(c["P"]["L1"]["text"])
+              print("=== L2 ===")
+              print(c["P"]["L2"]["text"])
+              print("=== L3 RAW RESPONSE ===")
+              print(c["P"]["L3"]["text"])
+              print("=== P FINAL / INFORMED ===")
               print(c["P"]["final_text"])
               print("=== C FINAL ===")
               print(c["C"]["final_text"])
-          if (root / "outcome_exact.json").exists():
-              print("=== OUTCOME ===")
-              print((root / "outcome_exact.json").read_text())
-          if (root / "successor_model_v1.json").exists():
-              print("=== SUCCESSOR ===")
-              print((root / "successor_model_v1.json").read_text())
-          if (root / "manifest.json").exists():
-              print("=== MANIFEST ===")
-              print((root / "manifest.json").read_text())
+          for fn, label in [
+              ("decision_frozen.json","DECISION"),
+              ("outcome_exact.json","OUTCOME"),
+              ("successor_model_v1.json","SUCCESSOR"),
+              ("manifest.json","MANIFEST"),
+          ]:
+              p = root / fn
+              if p.exists():
+                  print(f"=== {label} ===")
+                  print(p.read_text())
           PY
 
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cfl-macro-pc-v051-artifact
+          name: cfl-macro-pc-v052-artifact
           path: |
-            macro_pc_v051_artifact/
-            macro_pc_v051_summary.json
+            macro_pc_v052_artifact/
+            macro_pc_v052_summary.json
           if-no-files-found: error
           retention-days: 30
