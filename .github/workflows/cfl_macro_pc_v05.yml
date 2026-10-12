@@ -1,4 +1,4 @@
-name: CFL P Internal Anti-Regression Adjudicator v0.9
+name: CFL P Internal ASK Gate v1.0
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  p-internal-adjudicator-v09:
+  p-internal-ask-v10:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -36,26 +36,26 @@ jobs:
         run: |
           pip install transformers==4.57.1 safetensors==0.6.2
 
-      - name: Execute P-internal adjudicator gate
+      - name: Execute P-internal ASK gate
         run: |
-          python experiments/macro_pc_v05/run_p_internal_adjudicator_gate_v09.py | tee p_internal_v09_summary.json
+          python experiments/macro_pc_v05/run_p_internal_ask_gate_v10.py | tee p_internal_ask_v10_summary.json
 
       - name: Show result
         if: always()
         run: |
-          cat p_internal_v09_summary.json || true
-          if [ -f macro_pc_v09_artifact/manifest.json ]; then
+          cat p_internal_ask_v10_summary.json || true
+          if [ -f macro_pc_v10_artifact/manifest.json ]; then
             echo "=== MANIFEST ==="
-            cat macro_pc_v09_artifact/manifest.json
+            cat macro_pc_v10_artifact/manifest.json
           fi
 
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cfl-p-internal-adjudicator-v09-artifact
+          name: cfl-p-internal-ask-v10-artifact
           path: |
-            macro_pc_v09_artifact/
-            p_internal_v09_summary.json
+            macro_pc_v10_artifact/
+            p_internal_ask_v10_summary.json
           if-no-files-found: error
           retention-days: 30
