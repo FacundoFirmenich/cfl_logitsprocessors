@@ -48,6 +48,25 @@ jobs:
             cat macro_pc_v05_artifact/manifest.json
           fi
 
+      - name: Show candidate finals and exact outcome
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("macro_pc_v05_artifact")
+          if (root / "candidates.json").exists():
+              c = json.loads((root / "candidates.json").read_text())
+              print("=== P FINAL ===")
+              print(c["P"]["final_text"])
+              print("=== C FINAL ===")
+              print(c["C"]["final_text"])
+          if (root / "outcome_exact.json").exists():
+              o = json.loads((root / "outcome_exact.json").read_text())
+              print("=== OUTCOME ===")
+              print(json.dumps(o, indent=2))
+          PY
+
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
