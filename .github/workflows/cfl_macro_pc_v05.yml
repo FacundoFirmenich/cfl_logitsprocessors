@@ -1,0 +1,67 @@
+name: CFL Macro Jurisdiction Held-Out Gate v1.2
+
+on:
+  pull_request:
+    branches:
+      - "Ulalito's-Island"
+    paths:
+      - "experiments/macro_pc_v05/**"
+      - ".github/workflows/cfl_macro_pc_v05.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  macro-jurisdiction-heldout-v12:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install CPU PyTorch
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+
+      - name: Install Transformers
+        run: |
+          pip install transformers==4.57.1 safetensors==0.6.2 numpy==2.4.6
+
+      - name: Show frozen preregistration
+        run: |
+          sha256sum experiments/macro_pc_v05/PREREG_MACRO_JURISDICTION_v1.2.json
+          cat experiments/macro_pc_v05/PREREG_MACRO_JURISDICTION_v1.2.json
+
+      - name: Execute held-out macro jurisdiction gate
+        run: |
+          python experiments/macro_pc_v05/run_macro_jurisdiction_heldout_v12.py | tee macro_pc_v12_summary.json
+
+      - name: Show result
+        if: always()
+        run: |
+          cat macro_pc_v12_summary.json || true
+          if [ -f macro_pc_v12_artifact/manifest.json ]; then
+            echo "=== MANIFEST ==="
+            cat macro_pc_v12_artifact/manifest.json
+          fi
+
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfl-macro-jurisdiction-v12-artifact
+          path: |
+            macro_pc_v12_artifact/
+            macro_pc_v12_summary.json
+            experiments/macro_pc_v05/PREREG_MACRO_JURISDICTION_v1.2.json
+          if-no-files-found: error
+          retention-days: 30
