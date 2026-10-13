@@ -1,0 +1,127 @@
+name: QAS v3.8.2 prospective GPU
+
+on:
+  push:
+    branches:
+      - qas-v3.8.2-prospective
+    paths:
+      - ".github/workflows/qas_v382_gpu.yml"
+      - "experiments/qas_v3_8_2/**"
+
+jobs:
+  qas-v382-prospective:
+    runs-on: [self-hosted, linux, x64, gpu]
+    timeout-minutes: 1440
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HUGGING_FACE_HUB_TOKEN: ${{ secrets.HF_TOKEN }}
+      TOKENIZERS_PARALLELISM: "false"
+      BITSANDBYTES_NOWELCOME: "1"
+      HF_HUB_DOWNLOAD_TIMEOUT: "1200"
+      HF_HUB_ETAG_TIMEOUT: "120"
+
+    steps:
+      - name: Checkout frozen prospective branch
+        uses: actions/checkout@v4
+
+      - name: GPU and disk preflight
+        shell: bash
+        run: |
+          set -euxo pipefail
+          nvidia-smi
+          df -h
+          python3 --version
+          uv --version || true
+
+      - name: Reconstruct and verify frozen notebook
+        shell: bash
+        run: |
+          set -euxo pipefail
+          D="experiments/qas_v3_8_2/notebook_chunks"
+          O="experiments/qas_v3_8_2/RDS_V3_8_2_QAS_C_PC_PROSPECTIVE_LOCKED24_KAGGLE.ipynb"
+          clean() { tr -d '\r\n\t ' < "$1"; }
+          {
+            clean "$D/notebook.b64.part00"
+            clean "$D/notebook.b64.part01"
+            clean "$D/notebook.b64.part01.suf00"
+            clean "$D/notebook.b64.part02"
+            clean "$D/notebook.b64.part02.suf00"
+            clean "$D/notebook.b64.part02.suf01"
+            clean "$D/notebook.b64.part03"
+            clean "$D/notebook.b64.part03.suf00"
+            clean "$D/notebook.b64.part03.suf01"
+            clean "$D/notebook.b64.part04"
+            clean "$D/notebook.b64.part04.suf00"
+            clean "$D/notebook.b64.part04.suf01"
+            clean "$D/notebook.b64.part05"
+            clean "$D/notebook.b64.part06"
+          } | base64 -d | xz -d > "$O"
+          echo "cc1675e1bca388c055b949954e4a993f4ea415e9f02cd9d317cf2531f17a41b4  $O" | sha256sum -c -
+          python3 - <<'PY'
+          import json, pathlib, os
+          p=pathlib.Path("experiments/qas_v3_8_2/RDS_V3_8_2_QAS_C_PC_PROSPECTIVE_LOCKED24_KAGGLE.ipynb")
+          nb=json.loads(p.read_text())
+          work=str(pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / ".qas_working")
+          for cell in nb["cells"]:
+              if "source" in cell:
+                  cell["source"]=[line.replace("/kaggle/working", work) for line in cell["source"]]
+          p.write_text(json.dumps(nb, ensure_ascii=False, indent=1))
+          print("patched work root:", work)
+          PY
+
+      - name: Create isolated execution environment
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf .venv
+          uv venv .venv --python 3.11 --seed
+          source .venv/bin/activate
+          python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu118             torch==2.5.1 torchvision==0.20.1
+          python -m pip install --no-cache-dir             transformers==5.12.1             accelerate==1.14.0             bitsandbytes==0.49.2             pillow>=10.0             sentencepiece             safetensors             pandas             scipy             scikit-learn             pyarrow             papermill             ipykernel             nbformat             nbclient
+          python -m pip check || true
+          python - <<'PY'
+          import torch, transformers, accelerate, bitsandbytes
+          print("GPU:", torch.cuda.get_device_name(0))
+          print("capability:", torch.cuda.get_device_capability(0))
+          print("torch:", torch.__version__)
+          print("transformers:", transformers.__version__)
+          print("accelerate:", accelerate.__version__)
+          print("bitsandbytes:", bitsandbytes.__version__)
+          assert torch.cuda.is_available()
+          assert transformers.__version__ == "5.12.1"
+          assert accelerate.__version__ == "1.14.0"
+          assert bitsandbytes.__version__ == "0.49.2"
+          PY
+
+      - name: Execute QAS-C / QAS-PC LOCKED24 prospectively
+        shell: bash
+        run: |
+          set -euxo pipefail
+          source .venv/bin/activate
+          mkdir -p .qas_working qas_v382_outputs
+          INPUT="experiments/qas_v3_8_2/RDS_V3_8_2_QAS_C_PC_PROSPECTIVE_LOCKED24_KAGGLE.ipynb"
+          OUTPUT="qas_v382_outputs/RDS_V3_8_2_QAS_C_PC_PROSPECTIVE_LOCKED24_EXECUTED.ipynb"
+          set -o pipefail
+          papermill "$INPUT" "$OUTPUT" --log-output 2>&1 | tee qas_v382_outputs/papermill.log
+
+      - name: Collect scientific outputs
+        if: always()
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p qas_v382_outputs/work
+          if [ -d .qas_working ]; then
+            cp -a .qas_working/. qas_v382_outputs/work/ || true
+          fi
+          find qas_v382_outputs -type f -print0 | sort -z | xargs -0 sha256sum > qas_v382_outputs/SHA256SUMS_COLLECTED.txt || true
+          find qas_v382_outputs -maxdepth 4 -type f -printf "%p %s bytes\n" | sort | tee qas_v382_outputs/FILE_INDEX.txt
+
+      - name: Upload QAS v3.8.2 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: QAS_V3_8_2_PROSPECTIVE_RESULTS_${{ github.run_id }}
+          path: qas_v382_outputs/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
