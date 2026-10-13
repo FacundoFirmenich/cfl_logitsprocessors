@@ -1,0 +1,69 @@
+name: QAS v3.8.2 CPU reconstruction preflight
+
+on:
+  push:
+    branches:
+      - qas-v3.8.2-prospective
+    paths:
+      - ".github/workflows/qas_v382_cpu_preflight.yml"
+
+jobs:
+  reconstruct-and-compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct exact frozen notebook
+        shell: bash
+        run: |
+          set -euxo pipefail
+          D="experiments/qas_v3_8_2/notebook_chunks"
+          O="/tmp/qas_v382.ipynb"
+          clean() { tr -d '\r\n\t ' < "$1"; }
+          {
+            clean "$D/notebook.b64.part00"
+            clean "$D/notebook.b64.part01"
+            clean "$D/notebook.b64.part01.suf00"
+            clean "$D/notebook.b64.part02"
+            clean "$D/notebook.b64.part02.suf00"
+            clean "$D/notebook.b64.part02.suf01"
+            clean "$D/notebook.b64.part03"
+            clean "$D/notebook.b64.part03.suf00"
+            clean "$D/notebook.b64.part03.suf01"
+            clean "$D/notebook.b64.part04"
+            clean "$D/notebook.b64.part04.suf00"
+            clean "$D/notebook.b64.part04.suf01"
+            clean "$D/notebook.b64.part05"
+            clean "$D/notebook.b64.part06"
+          } | base64 -d | xz -d > "$O"
+          echo "cc1675e1bca388c055b949954e4a993f4ea415e9f02cd9d317cf2531f17a41b4  $O" | sha256sum -c -
+
+      - name: Parse and compile Python cells
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          import json, pathlib
+          p=pathlib.Path("/tmp/qas_v382.ipynb")
+          nb=json.loads(p.read_text())
+          compiled=0
+          skipped=[]
+          for i,cell in enumerate(nb["cells"]):
+              if cell.get("cell_type")!="code":
+                  continue
+              src="".join(cell.get("source",[]))
+              if src.lstrip().startswith(("!","%")):
+                  skipped.append(i)
+                  continue
+              compile(src, f"<cell {i}>", "exec")
+              compiled += 1
+          print("compiled_python_cells", compiled)
+          print("skipped_magic_cells", skipped)
+          assert compiled == 9
+          PY
+
+      - name: Emit preflight SHA
+        shell: bash
+        run: |
+          sha256sum /tmp/qas_v382.ipynb
