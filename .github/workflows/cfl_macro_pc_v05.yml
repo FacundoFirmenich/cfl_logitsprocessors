@@ -1,4 +1,4 @@
-name: CFL Macro Jurisdiction Held-Out Gate v1.2
+name: CFL External Gold-Isolated Benchmark v1.3
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  macro-jurisdiction-heldout-v12:
+  external-benchmark-v13:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -32,36 +32,36 @@ jobs:
           python -m pip install --upgrade pip
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
 
-      - name: Install Transformers
+      - name: Install benchmark runtime
         run: |
-          pip install transformers==4.57.1 safetensors==0.6.2 numpy==2.4.6
+          pip install transformers==4.57.1 safetensors==0.6.2 numpy==2.4.6 datasets==4.2.0
 
       - name: Show frozen preregistration
         run: |
-          sha256sum experiments/macro_pc_v05/PREREG_MACRO_JURISDICTION_v1.2.json
-          cat experiments/macro_pc_v05/PREREG_MACRO_JURISDICTION_v1.2.json
+          sha256sum experiments/macro_pc_v05/PREREG_EXTERNAL_BENCHMARK_v1.3.json
+          cat experiments/macro_pc_v05/PREREG_EXTERNAL_BENCHMARK_v1.3.json
 
-      - name: Execute held-out macro jurisdiction gate
+      - name: Execute external benchmark
         run: |
-          python experiments/macro_pc_v05/run_macro_jurisdiction_heldout_v12.py | tee macro_pc_v12_summary.json
+          python experiments/macro_pc_v05/run_external_benchmark_v13.py | tee external_v13_summary.json
 
       - name: Show result
         if: always()
         run: |
-          cat macro_pc_v12_summary.json || true
-          if [ -f macro_pc_v12_artifact/manifest.json ]; then
+          cat external_v13_summary.json || true
+          if [ -f external_v13_artifact/manifest.json ]; then
             echo "=== MANIFEST ==="
-            cat macro_pc_v12_artifact/manifest.json
+            cat external_v13_artifact/manifest.json
           fi
 
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cfl-macro-jurisdiction-v12-artifact
+          name: cfl-external-benchmark-v13-artifact
           path: |
-            macro_pc_v12_artifact/
-            macro_pc_v12_summary.json
-            experiments/macro_pc_v05/PREREG_MACRO_JURISDICTION_v1.2.json
+            external_v13_artifact/
+            external_v13_summary.json
+            experiments/macro_pc_v05/PREREG_EXTERNAL_BENCHMARK_v1.3.json
           if-no-files-found: error
           retention-days: 30
