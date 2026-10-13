@@ -1,0 +1,91 @@
+{
+  "schema": "cfl-macro-jurisdiction-prereg/v1.2",
+  "frozen_date": "2026-10-13",
+  "purpose": "First prospective positive-evidence gate for macro P/C jurisdiction after hierarchical abstention closure.",
+  "held_out_scope": {
+    "type": "held-out from macro P/C development sequence, not globally unseen",
+    "excluded_development_prompts": [
+      "p01",
+      "p03",
+      "p04"
+    ],
+    "evaluation_prompts": [
+      {
+        "id": "p06",
+        "category": "sequential_logic",
+        "concept": "Finite State Machine",
+        "source_budget": 512,
+        "source": "CFLDECODER_V2_p01_p10_constraints_sequence.ipynb"
+      },
+      {
+        "id": "p10",
+        "category": "sequential_logic",
+        "concept": "Matrix Permutation",
+        "source_budget": 512,
+        "source": "CFLDECODER_V2_p01_p10_constraints_sequence.ipynb"
+      },
+      {
+        "id": "p18",
+        "category": "complex_correlation",
+        "concept": "Bayesian Probabilistic Update",
+        "source_budget": 512,
+        "source": "CFLDECODER_V2_2_p11_p20_expansion_complex_AUTONOMOUS_SEEDS_14_08_48.ipynb"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "role": "development-family prospective macro holdout"
+    },
+    {
+      "id": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "role": "cross-family transportability probe"
+    }
+  ],
+  "replicate_seeds": [
+    611,
+    827,
+    1039
+  ],
+  "pairing": {
+    "baseline": "single base-model generation; same prompt and seed as C",
+    "P": "L1=baseline seed; L2=seed+1000; L3_raw=seed+2000; L3_informed=seed+3000; A_P anti-regression adjudication",
+    "C": "same baseline seed + TALM v0.5.2 mass_right_soft",
+    "rule": "P abstention produces no W/T/L observation; C is never credited because P is absent."
+  },
+  "outcome": {
+    "primary": "source exact validator pass/fail",
+    "WTL": "WIN iff candidate exact-pass and baseline exact-fail; LOSS iff candidate exact-fail and baseline exact-pass; otherwise TIE",
+    "synthetic_observations": false
+  },
+  "bayes": {
+    "prior": "Dirichlet(1,1,1) over WIN,TIE,LOSS independently by process/model and process/model/regime",
+    "monte_carlo_draws": 200000,
+    "rng_seed": 20261013,
+    "utility_gate": "Pr(p_WIN > p_LOSS | data) >= 0.95"
+  },
+  "gates": {
+    "support": {
+      "min_admissible_pairs_per_process_model": 6,
+      "min_task_regimes_per_process_model": 2
+    },
+    "task_regime_transportability": {
+      "min_regimes": 2,
+      "rule": "within every represented regime, observed LOSS count must not exceed WIN count; each regime requires >=2 admissible observations"
+    },
+    "cross_model_transportability": {
+      "rule": "support passes in both model families and the aggregate observed WIN-LOSS sign does not reverse across model families"
+    },
+    "authority": {
+      "rule": "This gate may produce PROVISIONAL_JURISDICTION_EVIDENCE only. It cannot grant operational APPLY_P/APPLY_C authority."
+    }
+  },
+  "claim_boundary": [
+    "No claim of global unseen evaluation.",
+    "No human/LLM semantic judge is used; only frozen source validators.",
+    "No authority promotion from P/C availability.",
+    "Transportability is limited to the two frozen model families and three frozen prompts.",
+    "Operational authority remains prohibited after this gate."
+  ]
+}
