@@ -1,0 +1,87 @@
+{
+  "schema": "cfl-external-benchmark-prereg/v1.3",
+  "frozen_date": "2026-10-13",
+  "purpose": "External benchmark hold-out of macro P/C without gold leakage into candidate production or P-internal adjudication.",
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "datasets": [
+    {
+      "name": "openai/gsm8k",
+      "config": "main",
+      "split": "test",
+      "indices": [
+        17,
+        103,
+        271,
+        509
+      ],
+      "task": "numeric_reasoning"
+    },
+    {
+      "name": "allenai/ai2_arc",
+      "config": "ARC-Challenge",
+      "split": "test",
+      "indices": [
+        13,
+        79,
+        211,
+        487
+      ],
+      "task": "multiple_choice_reasoning"
+    }
+  ],
+  "replicate_seeds": [
+    1301,
+    1709
+  ],
+  "generation": {
+    "baseline": "L1 base-model response",
+    "P": "L1,L2,L3_raw,L3_informed plus gold-free structural anti-regression selector",
+    "C": "same baseline seed with TALM v0.5.2 mass_right_soft",
+    "gsm8k_max_new_tokens": 160,
+    "arc_max_new_tokens": 96
+  },
+  "anti_regression": {
+    "allowed_features": [
+      "presence/parseability of FINAL field",
+      "ARC final label belongs to presented choice labels"
+    ],
+    "forbidden_features": [
+      "gold answer",
+      "exact correctness",
+      "post-outcome benchmark score"
+    ],
+    "rule": "retain L3_informed if structurally nondominated; if dominated and multiple parseable frontier stages remain, abstain rather than synthesize"
+  },
+  "temporal_firewall": [
+    "question text and answer format are visible during generation",
+    "gold answer is not passed to P, C, or A_P",
+    "P/C/baseline candidate hashes and BASELINE macro decision are frozen before gold evaluation",
+    "gold is evaluated only after decision freeze"
+  ],
+  "outcome": {
+    "WTL": "WIN if candidate correct and baseline incorrect; LOSS if candidate incorrect and baseline correct; TIE otherwise",
+    "prior": "Dirichlet(1,1,1) over WIN,TIE,LOSS",
+    "mc_draws": 200000,
+    "rng_seed": 20261013
+  },
+  "gates": {
+    "support": {
+      "min_pairs": 12,
+      "min_datasets": 2
+    },
+    "utility_risk": {
+      "criterion": "Pr(p_WIN > p_LOSS | data) >= 0.95"
+    },
+    "dataset_transportability": {
+      "criterion": "each dataset has >=6 admissible observations and observed LOSS <= WIN"
+    },
+    "authority": "No operational authority is granted by v1.3."
+  },
+  "claim_boundary": [
+    "Benchmark items are externally sourced but may have existed in model pretraining; this is not contamination-free evaluation.",
+    "Indices are frozen before execution; item content and hashes are preserved in the artifact.",
+    "No LLM judge is used.",
+    "No gold leakage into A_P is permitted.",
+    "This is one-model external validation; cross-model evidence comes from the separately preregistered v1.2 gate."
+  ]
+}
