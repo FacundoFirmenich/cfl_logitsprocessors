@@ -1,0 +1,22 @@
+{
+  "schema": "qas.p2.prospective.freeze.v1",
+  "status": "FROZEN_DESIGN_NOT_EXECUTED",
+  "runtime_name": "RDS v3.8 QAS Label-Complete Runtime",
+  "runtime_version": "3.8.0",
+  "empirical_p2_results_available": false,
+  "primary_structural_test": {
+    "name": "TOP64_UNIVERSAL_CANDIDATE_SUFFICIENCY",
+    "condition": "for every prospectively audited step, exact support S_t must be a subset of pre-operator top-64 C_64,t",
+    "falsification": "one observed step with S_t not subset of C_64,t falsifies universal top-64 sufficiency for the frozen campaign",
+    "no_statistical_tolerance_inferred": true
+  },
+  "target_order": ["ACTIVITY","SUPPORT_CLASS","EXACT_MASK"],
+  "observability_gate": [
+    "exact_support_ids","tokenizer_hash","vocab_size","baseline_top64_ids",
+    "baseline_top64_probs","operator_id","construction_parameters",
+    "fidelity_endpoint","provenance_hash"
+  ],
+  "authority_boundary": "QAS evidence receipts never self-authorize side effects; KCH lease required separately",
+  "preferred_execution": "fresh GPU campaign in Colab or an equivalent controlled GPU runner; Kaggle is not required by the contract",
+  "permission_granted": false
+}
