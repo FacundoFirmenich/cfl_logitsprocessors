@@ -1,0 +1,5 @@
+{
+  "embedded_runtime_cpu_tests": "9/9 PASS",
+  "note": "Executed against RDS_V3_8_QAS_LABEL_COMPLETE_RUNTIME.zip before GitHub publication.",
+  "gpu_campaign_executed": false
+}
