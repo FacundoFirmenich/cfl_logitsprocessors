@@ -1,0 +1,20 @@
+{
+  "schema": "qas.p2.gpu_execution_freeze.v1",
+  "status": "EXECUTION_READY_NOT_EXECUTED",
+  "model_id": "Qwen/Qwen3.5-4B",
+  "model_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "software_version": "3.8.0",
+  "experiment_id": "RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001",
+  "original_kaggle_notebook_sha256": "723978e34bf9a026d746f63c59ffc6c167965af4c24a948795558b819153210f",
+  "portable_colab_notebook_sha256": "bb72c30b5d19b8c6b09cb7332e9962d4aa6927aaae01afebafaca5c90eb552b9",
+  "embedded_runtime_zip_sha256": "f5d939ec46cffbbfb51e62bc0412b060b6868ae931ff03a31884998eb0bc4d9a",
+  "receipt_schema_sha256": "234765b85a915b8fbbeba1536df7f7db1312db6d8680d1c1288786364e1641b6",
+  "prospective_freeze_sha256": "c5d937292ec5a130bde2d6ac9e82943decc122b0ff40cdcdb22028f6edce9014",
+  "expected_transformers": "5.12.1",
+  "expected_accelerate": "1.14.0",
+  "expected_bitsandbytes": "0.49.2",
+  "expected_torch": "2.5.1",
+  "gpu_required": true,
+  "authority_boundary": "QAS-P2 evidence never self-authorizes KCH/KwanTau effects",
+  "permission_granted": false
+}
