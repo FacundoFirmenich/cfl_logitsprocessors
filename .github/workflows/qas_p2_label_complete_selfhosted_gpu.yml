@@ -25,7 +25,7 @@ jobs:
       BITSANDBYTES_NOWELCOME: "1"
       HF_HUB_DOWNLOAD_TIMEOUT: "1200"
       HF_HUB_ETAG_TIMEOUT: "120"
-      QAS_P2_WORK_ROOT: ${{ runner.temp }}/qas_p2_work
+      QAS_P2_WORK_ROOT: ".qas_p2_work"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,8 +91,8 @@ jobs:
         with:
           name: qas-p2-label-complete-v38-results-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/qas_p2_work/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip
-            ${{ runner.temp }}/qas_p2_work/FINAL_ZIP.sha256
-            ${{ runner.temp }}/qas_p2_work/RDS_V3_8_QAS_P2.executed.ipynb
+            .qas_p2_work/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip
+            .qas_p2_work/FINAL_ZIP.sha256
+            .qas_p2_work/RDS_V3_8_QAS_P2.executed.ipynb
           if-no-files-found: warn
           retention-days: 30
