@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QAS-P2 Label-Complete Evidence Receipt",
+  "type": "object",
+  "required": [
+    "schema","run_id","model_revision","tokenizer_hash","vocab_size",
+    "prompt_hash","seed","step_index","operator_id","baseline_top64_ids",
+    "baseline_top64_probs","support_ids","support_hash","support_size",
+    "support_fraction","fidelity_endpoint","provenance_hash"
+  ],
+  "properties": {
+    "schema": {"const": "qas.p2.evidence.v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "model_revision": {"type": "string", "minLength": 1},
+    "tokenizer_hash": {"type": "string", "minLength": 32},
+    "vocab_size": {"type": "integer", "minimum": 1},
+    "prompt_hash": {"type": "string", "minLength": 32},
+    "seed": {"type": "integer"},
+    "step_index": {"type": "integer", "minimum": 0},
+    "operator_id": {"type": "string", "minLength": 1},
+    "baseline_top64_ids": {"type": "array", "maxItems": 64, "items": {"type": "integer", "minimum": 0}},
+    "baseline_top64_probs": {"type": "array", "maxItems": 64, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+    "support_ids": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
+    "support_hash": {"type": "string", "minLength": 32},
+    "support_size": {"type": "integer", "minimum": 0},
+    "support_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+    "construction_parameters": {"type": "object"},
+    "activity_metric": {"type": ["number","null"]},
+    "fidelity_endpoint": {"type": "object"},
+    "closure_test": {"type": ["object","null"]},
+    "wall_time_ms": {"type": ["number","null"], "minimum": 0},
+    "gpu_time_ms": {"type": ["number","null"], "minimum": 0},
+    "provenance_hash": {"type": "string", "minLength": 32}
+  },
+  "additionalProperties": false
+}
