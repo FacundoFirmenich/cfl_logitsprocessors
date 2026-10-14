@@ -1,0 +1,52 @@
+name: QAS-P2 label-complete — CPU preflight
+
+on:
+  push:
+    branches:
+      - qas-p2-label-complete-gpu-2026-10-14
+    paths:
+      - "experiments/qas_p2_label_complete_2026_10_14/notebook_chunks/**"
+      - "execution/qas_p2/**"
+      - "scripts/reconstruct_qas_p2_notebook.py"
+      - "scripts/qas_p2_preflight.py"
+      - ".github/workflows/qas_p2_label_complete_preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qas-p2-label-complete-gpu-2026-10-14
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Reconstruct frozen portable notebook
+        run: python scripts/reconstruct_qas_p2_notebook.py --repo-root .
+      - name: Structural preregistration preflight
+        run: python scripts/qas_p2_preflight.py --repo-root .
+      - name: Materialize notebook in branch for Colab
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add notebooks/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_COLAB_GPU.ipynb
+          if git diff --cached --quiet; then
+            echo "Notebook already materialized at frozen SHA."
+          else
+            git commit -m "QAS-P2: materialize frozen Colab notebook"
+            git push origin HEAD:qas-p2-label-complete-gpu-2026-10-14
+          fi
+      - name: Upload preflight receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: qas-p2-label-complete-preflight
+          path: execution/qas_p2/PREFLIGHT_RESULT.json
+          retention-days: 30
