@@ -1,0 +1,98 @@
+name: QAS-P2 label-complete — self-hosted GPU
+
+on:
+  push:
+    branches:
+      - qas-p2-label-complete-gpu-2026-10-14
+    paths:
+      - "execution/qas_p2/TRIGGER_GPU"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qas-p2-label-complete-v38-qwen35-4b
+  cancel-in-progress: false
+
+jobs:
+  gpu-campaign:
+    runs-on: [self-hosted, linux, x64, gpu]
+    timeout-minutes: 1440
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HUGGING_FACE_HUB_TOKEN: ${{ secrets.HF_TOKEN }}
+      TOKENIZERS_PARALLELISM: "false"
+      BITSANDBYTES_NOWELCOME: "1"
+      HF_HUB_DOWNLOAD_TIMEOUT: "1200"
+      HF_HUB_ETAG_TIMEOUT: "120"
+      QAS_P2_WORK_ROOT: ${{ runner.temp }}/qas_p2_work
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qas-p2-label-complete-gpu-2026-10-14
+      - name: Reconstruct and verify frozen notebook
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/reconstruct_qas_p2_notebook.py --repo-root .
+          python scripts/qas_p2_preflight.py --repo-root .
+      - name: GPU and disk preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          nvidia-smi
+          df -h
+          python --version
+      - name: Create isolated frozen execution environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu118 \
+            torch==2.5.1 torchvision==0.20.1
+          python -m pip install --no-cache-dir \
+            transformers==5.12.1 accelerate==1.14.0 bitsandbytes==0.49.2 \
+            "pillow>=10.0" sentencepiece safetensors pandas scipy scikit-learn pyarrow \
+            papermill ipykernel nbformat nbclient jsonschema pytest
+          python - <<'PY'
+          import torch, transformers, accelerate, bitsandbytes
+          assert torch.cuda.is_available(), "CUDA unavailable"
+          assert transformers.__version__ == "5.12.1"
+          assert accelerate.__version__ == "1.14.0"
+          assert bitsandbytes.__version__ == "0.49.2"
+          print("GPU:", torch.cuda.get_device_name(0))
+          print("capability:", torch.cuda.get_device_capability(0))
+          print("torch:", torch.__version__)
+          PY
+      - name: Execute frozen QAS-P2 campaign
+        shell: bash
+        run: |
+          set -euo pipefail
+          source .venv/bin/activate
+          mkdir -p "$QAS_P2_WORK_ROOT"
+          papermill \
+            notebooks/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_COLAB_GPU.ipynb \
+            "$QAS_P2_WORK_ROOT/RDS_V3_8_QAS_P2.executed.ipynb" --log-output
+      - name: Validate final evidence ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          source .venv/bin/activate
+          FINAL_ZIP="$QAS_P2_WORK_ROOT/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip"
+          test -f "$FINAL_ZIP"
+          python scripts/qas_p2_validate_results.py "$FINAL_ZIP" \
+            --schema execution/qas_p2/qas_p2_receipt_schema.json
+          sha256sum "$FINAL_ZIP" | tee "$QAS_P2_WORK_ROOT/FINAL_ZIP.sha256"
+      - name: Upload raw evidence and executed notebook
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qas-p2-label-complete-v38-results-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/qas_p2_work/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip
+            ${{ runner.temp }}/qas_p2_work/FINAL_ZIP.sha256
+            ${{ runner.temp }}/qas_p2_work/RDS_V3_8_QAS_P2.executed.ipynb
+          if-no-files-found: warn
+          retention-days: 30
