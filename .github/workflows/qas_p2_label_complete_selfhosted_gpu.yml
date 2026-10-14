@@ -1,21 +1,15 @@
-name: QAS-P2 label-complete — self-hosted GPU
+name: QAS-P2 label-complete prospective GPU
 
 on:
   push:
     branches:
       - qas-p2-label-complete-gpu-2026-10-14
     paths:
+      - ".github/workflows/qas_p2_label_complete_selfhosted_gpu.yml"
       - "execution/qas_p2/TRIGGER_GPU"
 
-permissions:
-  contents: read
-
-concurrency:
-  group: qas-p2-label-complete-v38-qwen35-4b
-  cancel-in-progress: false
-
 jobs:
-  gpu-campaign:
+  qas-p2-label-complete:
     runs-on: [self-hosted, linux, x64, gpu]
     timeout-minutes: 1440
     env:
@@ -25,74 +19,121 @@ jobs:
       BITSANDBYTES_NOWELCOME: "1"
       HF_HUB_DOWNLOAD_TIMEOUT: "1200"
       HF_HUB_ETAG_TIMEOUT: "120"
-      QAS_P2_WORK_ROOT: ".qas_p2_work"
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: qas-p2-label-complete-gpu-2026-10-14
-      - name: Reconstruct and verify frozen notebook
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/reconstruct_qas_p2_notebook.py --repo-root .
-          python scripts/qas_p2_preflight.py --repo-root .
+      - name: Checkout frozen QAS-P2 branch
+        uses: actions/checkout@v4
+
       - name: GPU and disk preflight
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           nvidia-smi
           df -h
-          python --version
-      - name: Create isolated frozen execution environment
+          python3 --version
+          uv --version || true
+
+      - name: Reconstruct and verify frozen notebook
         shell: bash
         run: |
-          set -euo pipefail
-          python -m venv .venv
+          set -euxo pipefail
+          python3 scripts/reconstruct_qas_p2_notebook.py --repo-root .
+          python3 scripts/qas_p2_preflight.py --repo-root .
+
+      - name: Create isolated execution environment
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf .venv
+          if command -v uv >/dev/null 2>&1; then
+            uv venv .venv --python 3.11 --seed
+          else
+            python3 -m venv .venv
+          fi
           source .venv/bin/activate
           python -m pip install --upgrade pip
           python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu118 \
             torch==2.5.1 torchvision==0.20.1
           python -m pip install --no-cache-dir \
-            transformers==5.12.1 accelerate==1.14.0 bitsandbytes==0.49.2 \
-            "pillow>=10.0" sentencepiece safetensors pandas scipy scikit-learn pyarrow \
-            papermill ipykernel nbformat nbclient jsonschema pytest
+            transformers==5.12.1 \
+            accelerate==1.14.0 \
+            bitsandbytes==0.49.2 \
+            "pillow>=10.0" \
+            sentencepiece \
+            safetensors \
+            pandas \
+            scipy \
+            scikit-learn \
+            pyarrow \
+            papermill \
+            ipykernel \
+            nbformat \
+            nbclient \
+            jsonschema \
+            pytest
           python - <<'PY'
           import torch, transformers, accelerate, bitsandbytes
-          assert torch.cuda.is_available(), "CUDA unavailable"
-          assert transformers.__version__ == "5.12.1"
-          assert accelerate.__version__ == "1.14.0"
-          assert bitsandbytes.__version__ == "0.49.2"
           print("GPU:", torch.cuda.get_device_name(0))
           print("capability:", torch.cuda.get_device_capability(0))
           print("torch:", torch.__version__)
+          print("transformers:", transformers.__version__)
+          print("accelerate:", accelerate.__version__)
+          print("bitsandbytes:", bitsandbytes.__version__)
+          assert torch.cuda.is_available()
+          assert transformers.__version__ == "5.12.1"
+          assert accelerate.__version__ == "1.14.0"
+          assert bitsandbytes.__version__ == "0.49.2"
           PY
-      - name: Execute frozen QAS-P2 campaign
+
+      - name: Execute QAS-P2 label-complete LOCKED20 prospectively
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           source .venv/bin/activate
-          mkdir -p "$QAS_P2_WORK_ROOT"
-          papermill \
-            notebooks/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_COLAB_GPU.ipynb \
-            "$QAS_P2_WORK_ROOT/RDS_V3_8_QAS_P2.executed.ipynb" --log-output
-      - name: Validate final evidence ZIP
+          rm -rf .qas_p2_work qas_p2_outputs
+          mkdir -p .qas_p2_work qas_p2_outputs
+          export QAS_P2_WORK_ROOT="$GITHUB_WORKSPACE/.qas_p2_work"
+          INPUT="notebooks/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_COLAB_GPU.ipynb"
+          OUTPUT="qas_p2_outputs/RDS_V3_8_QAS_P2_LABEL_COMPLETE_EXECUTED.ipynb"
+          set -o pipefail
+          papermill "$INPUT" "$OUTPUT" --log-output 2>&1 | tee qas_p2_outputs/papermill.log
+
+      - name: Validate scientific outputs
+        if: always()
         shell: bash
         run: |
-          set -euo pipefail
-          source .venv/bin/activate
-          FINAL_ZIP="$QAS_P2_WORK_ROOT/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip"
-          test -f "$FINAL_ZIP"
-          python scripts/qas_p2_validate_results.py "$FINAL_ZIP" \
-            --schema execution/qas_p2/qas_p2_receipt_schema.json
-          sha256sum "$FINAL_ZIP" | tee "$QAS_P2_WORK_ROOT/FINAL_ZIP.sha256"
-      - name: Upload raw evidence and executed notebook
+          set -euxo pipefail
+          source .venv/bin/activate || true
+          FINAL_ZIP=".qas_p2_work/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip"
+          if [ -f "$FINAL_ZIP" ]; then
+            python scripts/qas_p2_validate_results.py "$FINAL_ZIP" \
+              --schema execution/qas_p2/qas_p2_receipt_schema.json
+            sha256sum "$FINAL_ZIP" | tee qas_p2_outputs/FINAL_ZIP.sha256
+            python scripts/qas_p2_post_gpu_closure.py "$FINAL_ZIP" \
+              --schema execution/qas_p2/qas_p2_receipt_schema.json \
+              --output qas_p2_outputs/post_gpu_closure
+          else
+            echo "Final ZIP absent; retaining execution diagnostics only."
+          fi
+
+      - name: Collect scientific outputs
+        if: always()
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p qas_p2_outputs/work
+          if [ -d .qas_p2_work ]; then
+            cp -a .qas_p2_work/. qas_p2_outputs/work/ || true
+          fi
+          find qas_p2_outputs -type f -print0 | sort -z | xargs -0 sha256sum > qas_p2_outputs/SHA256SUMS_COLLECTED.txt || true
+          find qas_p2_outputs -maxdepth 4 -type f -printf "%p %s bytes\n" | sort | tee qas_p2_outputs/FILE_INDEX.txt
+
+      - name: Upload QAS-P2 results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: qas-p2-label-complete-v38-results-${{ github.run_id }}
-          path: |
-            .qas_p2_work/RDS_V3_8_QAS_P2_LABEL_COMPLETE_QWEN35_4B_LOCKED20_001_FINAL_COMPLETE.zip
-            .qas_p2_work/FINAL_ZIP.sha256
-            .qas_p2_work/RDS_V3_8_QAS_P2.executed.ipynb
+          name: QAS_P2_LABEL_COMPLETE_RESULTS_${{ github.run_id }}
+          path: qas_p2_outputs/
           if-no-files-found: warn
           retention-days: 30
+          compression-level: 6
