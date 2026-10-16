@@ -1,0 +1,141 @@
+name: QAS v3.8.2 critical Kaggle execution
+
+on:
+  pull_request:
+    branches:
+      - "Ulalito's-Island"
+    paths:
+      - "experiments/qas-v382/**"
+      - ".github/workflows/qas-v382-kaggle.yml"
+  workflow_dispatch:
+
+jobs:
+  launch-kaggle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      KERNEL_SLUG: qas-p-v382-prospective-locked24
+      PACKAGE_SHA256: a279cb1aaba00dfae04d0d4a3a90f7c06ba168bcdae5df873c115a1f7ebc52ac
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct frozen package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run
+          base64 -d experiments/qas-v382/package.b64 > run/package.zip
+          echo "$PACKAGE_SHA256  run/package.zip" | sha256sum -c -
+          unzip -q run/package.zip -d run/package
+          unzip -t run/package.zip
+
+      - name: Convert notebook to auto-restarting Kaggle script
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          notebook = Path("run/package/RDS_V3_8_2_QAS_C_PC_PROSPECTIVE_LOCKED24_KAGGLE.ipynb")
+          nb = json.loads(notebook.read_text(encoding="utf-8"))
+          blocks = []
+          for cell in nb["cells"]:
+              if cell.get("cell_type") != "code":
+                  continue
+              src = "".join(cell.get("source", []))
+              if not src.strip():
+                  continue
+              blocks.append(src)
+
+          script = "\n\n".join(blocks)
+          old = "os.kill(os.getpid(), signal.SIGKILL)"
+          new = "os.execv(sys.executable, [sys.executable, __file__])"
+          if old not in script:
+              raise RuntimeError("Expected one-restart bootstrap marker was not found")
+          script = script.replace(old, new, 1)
+
+          target = Path("run/run_qas_v382.py")
+          target.write_text(script, encoding="utf-8")
+          compile(script, str(target), "exec")
+          print("Generated", target, "bytes=", target.stat().st_size)
+
+      - name: Verify Kaggle credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${KAGGLE_USERNAME:-}" ] || [ -z "${KAGGLE_KEY:-}" ]; then
+            echo "::error::KAGGLE_USERNAME/KAGGLE_KEY repository secrets are unavailable."
+            exit 42
+          fi
+          python -m pip install --quiet --upgrade kaggle
+
+      - name: Freeze Kaggle kernel metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > run/kernel-metadata.json <<EOF
+          {
+            "id": "${KAGGLE_USERNAME}/${KERNEL_SLUG}",
+            "title": "QAS-C QAS-PC v3.8.2 LOCKED24 prospective",
+            "code_file": "run_qas_v382.py",
+            "language": "python",
+            "kernel_type": "script",
+            "is_private": true,
+            "enable_gpu": true,
+            "enable_internet": true,
+            "dataset_sources": [],
+            "competition_sources": [],
+            "kernel_sources": []
+          }
+          EOF
+          cat run/kernel-metadata.json
+
+      - name: Push critical campaign to Kaggle
+        shell: bash
+        run: |
+          set -euo pipefail
+          kaggle kernels push -p run
+          echo "${KAGGLE_USERNAME}/${KERNEL_SLUG}" > kernel_ref.txt
+
+      - name: Wait for Kaggle completion
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref="${KAGGLE_USERNAME}/${KERNEL_SLUG}"
+          mkdir -p kaggle_status
+          for i in $(seq 1 330); do
+            status="$(kaggle kernels status "$ref" 2>&1 | tee kaggle_status/status_${i}.txt || true)"
+            echo "[poll ${i}] $status"
+            if echo "$status" | grep -Eqi "complete|error|cancel"; then
+              if echo "$status" | grep -Eqi "error|cancel"; then
+                exit 43
+              fi
+              break
+            fi
+            sleep 60
+          done
+
+      - name: Download scientific outputs
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p kaggle_output
+          if [ -n "${KAGGLE_USERNAME:-}" ]; then
+            kaggle kernels output "${KAGGLE_USERNAME}/${KERNEL_SLUG}" -p kaggle_output --force
+          fi
+          find kaggle_output -maxdepth 2 -type f -printf "%p %s bytes\n" | sort || true
+
+      - name: Upload campaign outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qas-v382-kaggle-output
+          path: |
+            kernel_ref.txt
+            kaggle_status/
+            kaggle_output/
+            run/kernel-metadata.json
+          if-no-files-found: warn
+          retention-days: 30
