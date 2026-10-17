@@ -1,0 +1,150 @@
+name: QAS v3.8.2 critical Kaggle execution
+
+on:
+  pull_request:
+    branches: ["Ulalito's-Island"]
+    paths:
+      - "experiments/qas-v382/**"
+      - ".github/workflows/qas-v382-kaggle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launch-kaggle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      KERNEL_SLUG: qas-p-v382-prospective-locked24
+      NOTEBOOK_SHA256: cc1675e1bca388c055b949954e4a993f4ea415e9f02cd9d317cf2531f17a41b4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recover immutable frozen notebook and verify bytes
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+        shell: python
+        run: |
+          import base64, hashlib, json, lzma, os, re, urllib.request
+          from pathlib import Path
+          root = Path('run')
+          root.mkdir(exist_ok=True)
+          api = 'https://api.github.com/repos/FacundoFirmenich/cfl_logitsprocessors'
+          tree_sha = 'cf8f84e577525a2addd83b259d81a60172d64fe6'
+          def get(path):
+              request = urllib.request.Request(api + path, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_READ_TOKEN'],
+                  'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+          receipt = {'tree_sha': tree_sha, 'expected_notebook_sha256': os.environ['NOTEBOOK_SHA256']}
+          try:
+              tree = get('/git/trees/' + tree_sha)
+              if tree.get('truncated'):
+                  raise RuntimeError('Truncated immutable chunk tree')
+              entries = sorted(tree['tree'], key=lambda item: item['path'])
+              main = [item['path'] for item in entries if re.fullmatch(r'notebook\.b64\.part\d{2}', item['path'])]
+              if main != ['notebook.b64.part%02d' % i for i in range(7)]:
+                  raise RuntimeError('Missing or unexpected notebook part')
+              encoded = []
+              for item in entries:
+                  if not re.fullmatch(r'notebook\.b64\.part\d{2}(\.suf\d{2})?', item['path']):
+                      raise RuntimeError('Unexpected chunk entry: ' + item['path'])
+                  blob = get('/git/blobs/' + item['sha'])
+                  data = base64.b64decode(blob['content'])
+                  actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+                  if actual != item['sha']:
+                      raise RuntimeError('Git blob checksum mismatch')
+                  encoded.append(b''.join(data.split()))
+              packed = base64.b64decode(b''.join(encoded), validate=True)
+              notebook_bytes = lzma.decompress(packed)
+              actual = hashlib.sha256(notebook_bytes).hexdigest()
+              receipt.update({'actual_notebook_sha256': actual, 'notebook_bytes': len(notebook_bytes), 'chunks': len(entries)})
+              if actual != os.environ['NOTEBOOK_SHA256']:
+                  raise RuntimeError('Recovered notebook differs from frozen scientific artifact')
+              nb = json.loads(notebook_bytes)
+              script = '\n\n'.join(''.join(c.get('source', [])) for c in nb['cells'] if c.get('cell_type') == 'code')
+              old = 'os.kill(os.getpid(), signal.SIGKILL)'
+              if old not in script:
+                  raise RuntimeError('Expected bootstrap restart marker absent')
+              script = script.replace(old, 'os.execv(sys.executable, [sys.executable, __file__])', 1)
+              compile(script, 'run_qas_v382.py', 'exec')
+              (root / 'run_qas_v382.py').write_text(script, encoding='utf-8')
+              receipt['status'] = 'FROZEN_NOTEBOOK_RECOVERED_AND_COMPILED'
+          except Exception as exc:
+              receipt['status'] = 'RECOVERY_BLOCKED'
+              receipt['error'] = type(exc).__name__ + ': ' + str(exc)
+              raise
+          finally:
+              (root / 'recovery_receipt.json').write_text(json.dumps(receipt, indent=2))
+
+      - name: Verify Kaggle credential availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${KAGGLE_USERNAME:-}" ] || [ -z "${KAGGLE_KEY:-}" ]; then
+            echo '::error::KAGGLE_CREDENTIALS_UNAVAILABLE: no GPU campaign was launched.'
+            exit 42
+          fi
+          python -m pip install --quiet --upgrade kaggle
+
+      - name: Freeze private Kaggle kernel metadata
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+          metadata = {'id': os.environ['KAGGLE_USERNAME'] + '/' + os.environ['KERNEL_SLUG'],
+              'title': 'QAS-C QAS-PC v3.8.2 LOCKED24 prospective',
+              'code_file': 'run_qas_v382.py', 'language': 'python', 'kernel_type': 'script',
+              'is_private': True, 'enable_gpu': True, 'enable_internet': True,
+              'dataset_sources': [], 'competition_sources': [], 'kernel_sources': []}
+          Path('run/kernel-metadata.json').write_text(json.dumps(metadata, indent=2))
+
+      - name: Push critical campaign to Kaggle
+        shell: bash
+        run: |
+          set -euo pipefail
+          kaggle kernels push -p run
+          echo "${KAGGLE_USERNAME}/${KERNEL_SLUG}" > kernel_ref.txt
+
+      - name: Wait for Kaggle completion
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref="${KAGGLE_USERNAME}/${KERNEL_SLUG}"
+          mkdir -p kaggle_status
+          completed=false
+          for i in $(seq 1 330); do
+            status="$(kaggle kernels status "$ref" 2>&1 | tee kaggle_status/status_${i}.txt || true)"
+            echo "[poll ${i}] $status"
+            if echo "$status" | grep -Eqi 'error|cancel'; then exit 43; fi
+            if echo "$status" | grep -Eqi 'complete'; then completed=true; break; fi
+            sleep 60
+          done
+          if [ "$completed" != true ]; then echo '::error::KAGGLE_WAIT_TIMEOUT'; exit 44; fi
+
+      - name: Download scientific outputs only after confirmed launch
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p kaggle_output
+          if [ -f kernel_ref.txt ]; then
+            kaggle kernels output "$(cat kernel_ref.txt)" -p kaggle_output --force
+          fi
+
+      - name: Upload execution receipts and available outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qas-v382-execution-receipts
+          path: |
+            run/recovery_receipt.json
+            kernel_ref.txt
+            kaggle_status/
+            kaggle_output/
+          if-no-files-found: warn
+          retention-days: 30
