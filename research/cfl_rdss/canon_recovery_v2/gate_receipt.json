@@ -1,0 +1,20 @@
+{
+  "release": "CFL_RDSS_CANON_RECOVERY_v2_0_0",
+  "rss_status": "INVALID_MISTRANSCRIPTION_NEVER_EXISTED",
+  "primary_source_zips_verified": 8,
+  "rdss240_rows": 240,
+  "rdss240_prompts": 18,
+  "rdss240_seeds": [11, 22, 33],
+  "post_projection_flips": 0,
+  "think_tag_rows": 0,
+  "action_equivalence_talm_right_high_talon_head_right": "54/54",
+  "prefill_local_conflicts": 33,
+  "prefill_conflict_prompts": 10,
+  "local_graph_nodes": 378,
+  "local_graph_edges": 2268,
+  "stage_local_tests": "17 passed + 10 subtests",
+  "directcomp_raw_status": "NOT_MOUNTED",
+  "rds_v35_final252_raw_status": "NOT_MOUNTED",
+  "authority": "NONE",
+  "release_zip_sha256": "af5d87f5956da0012ede7acadac4b1058b76183bd659963e6d19ee4b00f5a9c3"
+}

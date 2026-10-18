@@ -1,0 +1,24 @@
+artifact_id,object_type,scope,evidence_state,claim_authority,source_basis
+CFL,architecture,meta-architecture,CANONICAL,CFL/TOS/DIN observation and structure; authority assigned downstream,source corpus
+TALM_TALON,operator_families,pre-softmax operators and probes,CANONICAL,"Actions in portfolio, not sovereign router",source corpus
+DIRECTCOMP_EXP2,campaign,"Qwen3.5-4B-Base, 480 outputs",E3_DERIVED_RAW_UNMOUNTED,"Strong external controls; no selected surface-metric CFL win",master inventory + superaudit
+RDS_v1.2,engineering_release,unified runtime,E2_ENGINEERING,No live outcome claim,master inventory
+RDS_v1.2.3,engineering_release,P100 readiness,E2_ENGINEERING,No standalone result,master inventory
+RDS_v1.3.1,engineering_release,empirical/analytical/hybrid,E2_ENGINEERING,Mode comparison not realized in fail-closed live run,master inventory
+RDS_944_LIVE,campaign,300 rows / five modes,E1_E3_NEGATIVE,All modes baseline 60/60 due support/cost gate failure,superaudit
+RDS_v3.3_QAS,campaign,180 rows / 60 triplets,E1_E3_NULL,Prior collapse; no utility or speed claim,master evidence graph
+RDS_v3.5_QAS_FINAL252,campaign,252 rows / 96 exact pairs / 70 non-vacuous,E1_ATTESTED_BYTES_NOT_MOUNTED,Canonical QAS fidelity campaign; full package still missing,test log + evidence graph
+Bayesian_RDS_v0.2,priors,4852 evidence records,E1_E3_DERIVED,Separate from heuristic v3.5,master inventory
+CFL_dr_v0.3,mechanistic_campaign,1350 responder labels / 150 context-action,E1_E3_DERIVED,Top-2 and responder-state evidence,master inventory
+CFLDR_Plus_v0.4,router_campaign,240 generations / 300 blind pairs,E1_E3_DERIVED,Preroute/inline; 35 validator-review discrepancies,README + superaudit
+RDSS_QWEN_KAGGLE_v2.1,candidate_campaign,240 primary rows,E1_PRIMARY_BYTES_VERIFIED,Operational/mechanistic evidence only; no semantic promotion,MERGED_COMPLETE_240_FINAL
+RDSS_CPU_REBUILD_v1,reconstruction,378 observed rows,E3_DERIVED,No generation reexecution; legacy automatic contract,CPU rebuild bytes
+RDSS_CPU_INTERPRETATION_v1,interpretation,frozen router and hindsight bound,E3_DERIVED,Router under baseline; oracle post hoc only,CPU interpretation bytes
+RDSS_SEMANTIC_WITNESS_v1,semantic_audit,p09/p15 exact witnesses,E3_DERIVED,Weak evaluator defects isolated,semantic witness bytes
+RDSS_P09_CONDITIONAL_v1,conditional_semantics,dialect branches,E3_DERIVED,Conventions explicit; no silent correction,P09 bytes
+RDSS_LOCAL_GRAPH_v1,cartography,378 nodes / 2268 edges,E3_DERIVED,"Legacy 4-component contract, not full semantic utility",local graph bytes
+RDSS_PREFILL_RESOLUTION_v1,identifiability_audit,33 local conflicts,E3_DERIVED,Static prompt-action prefill not deterministically sufficient,prefill bytes
+RDSS_STAGE_LOCAL_v1,software,stage relation analyzer,E2_SOFTWARE_PASS_E1_OPEN,17 tests + 10 subtests; real tensor execution pending,stage-local bytes
+RDSS_v2.4,assurance_release,trust/quorum/revocation/outbox/preregistration,E2_E4_ASSURANCE,No scientific outcome or production authority,formal audit
+QAS_v3.8.2,prospective_release,frozen notebook,PREREGISTERED,Compiled; GPU result blocked/missing,QAS paper v0.13
+QAS_P2,prospective_campaign,label-complete paired shadow,PREREGISTERED,No positive result,registry
