@@ -1,0 +1,51 @@
+{
+  "authority": "NONE",
+  "decisions": [
+    {
+      "campaign": "RDS v3.3",
+      "canonical_decision": "BASELINE",
+      "cas_e": "REJECTED",
+      "cas_v": "NOT_IDENTIFIABLE",
+      "claim_ceiling": "Null/prior-collapse evidence only; no branch-utility or QAS-speed claim.",
+      "decision_id": "REPLAY-RDS33",
+      "historical_router_action": "talm_right_high",
+      "reason": [
+        "60/60 baseline/full/QAS triplets text-identical",
+        "all 20 plans selected same action",
+        "human prior mean share 0.77096",
+        "counterfactual winner changes when prior is removed"
+      ]
+    },
+    {
+      "actions": ["talm_right_high", "talon_head_right"],
+      "campaign": "G0 240",
+      "canonical_decision": "COLLAPSE_GENERATION_EQUIVALENCE_KEEP_PROBES_DISTINCT",
+      "cas_e": "NOT_IDENTIFIABLE_FOR_GENERATION_PREFERENCE",
+      "cas_v": "CERTIFIED_PROBE_DISTINCTION",
+      "claim_ceiling": "Candidate/probe mechanics and equivalence structure only; no semantic authority labels are present.",
+      "decision_id": "REPLAY-G0-EQUIV",
+      "reason": [
+        "final text identical 54/54 common units",
+        "mean standardized fingerprint distance 2.568078"
+      ]
+    },
+    {
+      "campaign": "COMPETITOR944",
+      "canonical_decision": "METHOD_LOCAL_QAS_SUPPORT_ONLY",
+      "cas_e": "SUPPORTED_WITH_BOUNDARY",
+      "cas_v_by_method": {
+        "contrastive_search_alpha0p6_k4": "FRAGILE_NONEXACT_FIDELITY",
+        "eta_sampling_9e_4": "FRAGILE_NONEXACT_FIDELITY",
+        "min_k_tau3": "CERTIFIED_EXACT_FIDELITY",
+        "min_p_0p05": "CERTIFIED_EXACT_FIDELITY",
+        "min_p_0p10": "CERTIFIED_EXACT_FIDELITY",
+        "min_p_0p20": "CERTIFIED_EXACT_FIDELITY",
+        "mirostat_v2_tau5_eta0p1": "FRAGILE_NONEXACT_FIDELITY"
+      },
+      "claim_ceiling": "Method-specific QAS fidelity only; no universal neutrality and no speedup.",
+      "decision_id": "REPLAY-COMP944",
+      "speed_claim": "REJECTED"
+    }
+  ],
+  "schema_version": "CFL-RDSS-HISTORICAL-REPLAY-1.0"
+}
