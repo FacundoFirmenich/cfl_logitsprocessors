@@ -1,0 +1,113 @@
+name: R3 bounded public asset transfer
+on:
+  push:
+    branches: [exec/kwan-r3-20261018]
+    paths: [.github/workflows/offline-assets-chunk-r3.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+jobs:
+  transfer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 39113475232
+          name: KWAN-R3-public-reference-assets-39113475232
+          path: acquired
+      - name: De-duplicate public cache and split transport below connector per-file limit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import tarfile,hashlib,json
+          root=Path('acquired');out=Path('parts');out.mkdir()
+          manifest=json.loads((root/'MODEL_MANIFEST.json').read_text())
+          rev=manifest['revision']
+          snapshots=list((root/'hf_cache').glob('models--*/snapshots/'+rev))
+          if len(snapshots)!=1:raise RuntimeError('AMBIGUOUS_SNAPSHOT')
+          snap=snapshots[0]
+          selected=[p for p in snap.rglob('*') if p.is_file()]+list((root/'wheels').glob('*.whl'))+[root/'MODEL_MANIFEST.json']
+          inventory={str(p.relative_to(root)):{'size':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in selected}
+          with tarfile.open('public_reference.tar','w',dereference=True) as t:
+              for p in selected:t.add(p,arcname=str(p.relative_to(root)),recursive=False)
+          chunks=[]
+          with open('public_reference.tar','rb') as f:
+              for i in range(8):
+                  b=f.read(400000000)
+                  if not b:break
+                  name=f'part{i:02d}';(out/name).write_bytes(b)
+                  chunks.append({'name':name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+              if f.read(1):raise RuntimeError('TRANSPORT_TOO_LARGE')
+          (out/'TRANSPORT.json').write_text(json.dumps({'model_id':manifest['model_id'],'revision':rev,'parts':chunks,'files':inventory,'private_content':False},indent=2))
+          print(json.dumps({'parts':chunks,'source_files':len(selected),'total_bytes':sum(c['bytes'] for c in chunks)},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R3-public-assets-manifest-${{ github.run_id }}
+          path: parts/TRANSPORT.json
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part00') != '' }}
+        with:
+          name: R3-public-assets-part00-${{ github.run_id }}
+          path: parts/part00
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part01') != '' }}
+        with:
+          name: R3-public-assets-part01-${{ github.run_id }}
+          path: parts/part01
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part02') != '' }}
+        with:
+          name: R3-public-assets-part02-${{ github.run_id }}
+          path: parts/part02
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part03') != '' }}
+        with:
+          name: R3-public-assets-part03-${{ github.run_id }}
+          path: parts/part03
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part04') != '' }}
+        with:
+          name: R3-public-assets-part04-${{ github.run_id }}
+          path: parts/part04
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part05') != '' }}
+        with:
+          name: R3-public-assets-part05-${{ github.run_id }}
+          path: parts/part05
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part06') != '' }}
+        with:
+          name: R3-public-assets-part06-${{ github.run_id }}
+          path: parts/part06
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('parts/part07') != '' }}
+        with:
+          name: R3-public-assets-part07-${{ github.run_id }}
+          path: parts/part07
+          compression-level: 0
+          retention-days: 1
+      - name: Remove only this session oversized temporary source artifact after successful transfer packaging
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method DELETE repos/FacundoFirmenich/cfl_logitsprocessors/actions/artifacts/12130874919
