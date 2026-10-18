@@ -1,0 +1,71 @@
+name: QAS immutable transport diagnostics
+on:
+  push:
+    branches: ['qas/stateful-recovery-20261018']
+    paths: ['.github/workflows/qas-transport-diagnostics.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: qas-transport-diagnostics
+  cancel-in-progress: false
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve immutable public chunks and record diagnostics
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        shell: python
+        run: |
+          import base64, hashlib, json, lzma, os, re, urllib.request
+          from pathlib import Path
+          out=Path('transport'); out.mkdir()
+          api='https://api.github.com/repos/FacundoFirmenich/cfl_logitsprocessors'
+          tree_sha='cf8f84e577525a2addd83b259d81a60172d64fe6'
+          expected='cc1675e1bca388c055b949954e4a993f4ea415e9f02cd9d317cf2531f17a41b4'
+          receipt={'tree_sha':tree_sha,'expected_notebook_sha256':expected,
+              'gpu_campaign_launched':False,
+              'credentials_present':{k:bool(os.environ.get(k,'')) for k in ('KAGGLE_USERNAME','KAGGLE_KEY')}}
+          def get(path):
+              req=urllib.request.Request(api+path,headers={'Authorization':'Bearer '+os.environ['GH_READ_TOKEN'],'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(req,timeout=30) as response:return json.load(response)
+          try:
+              tree=get('/git/trees/'+tree_sha)
+              if tree.get('truncated'):raise ValueError('truncated tree')
+              entries=sorted(tree['tree'],key=lambda x:x['path'])
+              joined=[]; metadata=[]
+              for item in entries:
+                  if not re.fullmatch(r'notebook\.b64\.part\d{2}(\.suf\d{2})?',item['path']):raise ValueError('unexpected path')
+                  blob=get('/git/blobs/'+item['sha'])
+                  raw=base64.b64decode(blob['content'])
+                  if hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()!=item['sha']:raise ValueError('blob hash mismatch')
+                  (out/item['path']).write_bytes(raw)
+                  clean=b''.join(raw.split());joined.append(clean)
+                  metadata.append({'path':item['path'],'bytes':len(raw),'clean_bytes':len(clean),'sha':item['sha']})
+              encoded=b''.join(joined);(out/'joined.b64').write_bytes(encoded)
+              packed=base64.b64decode(encoded,validate=True);(out/'packed.xz').write_bytes(packed)
+              receipt.update(chunks=metadata,encoded_bytes=len(encoded),packed_bytes=len(packed))
+              try:
+                  raw=lzma.decompress(packed)
+                  receipt['recovered_sha256']=hashlib.sha256(raw).hexdigest()
+                  if receipt['recovered_sha256']!=expected:raise ValueError('frozen hash mismatch')
+                  (out/'frozen_notebook.ipynb').write_bytes(raw)
+                  receipt['status']='EXACT_SOURCE_RECOVERED'
+              except Exception as exc:
+                  receipt['status']='SOURCE_CORRUPT';receipt['error']=type(exc).__name__+': '+str(exc)
+          except Exception as exc:
+              receipt['status']='DIAGNOSTIC_ERROR';receipt['error']=type(exc).__name__+': '+str(exc)
+          finally:
+              (out/'receipt.json').write_text(json.dumps(receipt,indent=2))
+              print(json.dumps(receipt,indent=2))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qas-immutable-transport-diagnostics
+          path: transport/
+          if-no-files-found: error
+          retention-days: 7

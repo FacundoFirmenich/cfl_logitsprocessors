@@ -1,0 +1,74 @@
+name: QAS v382 verified recovery and guarded submission
+on:
+  push:
+    branches: ['qas/stateful-recovery-20261018']
+    paths: ['.github/workflows/qas-v382-recovered.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: qas-v382-locked24-submission
+  cancel-in-progress: false
+jobs:
+  recover-and-submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover exact frozen scientific artifact
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+        run: python experiments/qas-v382/recover_verified_transport.py --out run
+      - name: Check credential presence without disclosing values
+        id: credentials
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+          present={k:bool(os.environ.get(k,'')) for k in ('KAGGLE_USERNAME','KAGGLE_KEY')}
+          available=all(present.values())
+          Path('run/credential_receipt.json').write_text(json.dumps({'credentials_present':present,'available':available,'gpu_campaign_launched':False},indent=2))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('available='+str(available).lower()+'\n')
+          if not available:
+              Path('run/execution_state.json').write_text(json.dumps({'status':'BLOCKED_CREDENTIALS_AFTER_SUCCESSFUL_RECOVERY','gpu_campaign_launched':False},indent=2))
+              print('QAS_SOURCE_RECOVERED; KAGGLE_CREDENTIALS_UNAVAILABLE; NO_GPU_CAMPAIGN_LAUNCHED')
+      - name: Prepare private kernel metadata and record client version
+        if: steps.credentials.outputs.available == 'true'
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+        run: |
+          python -m pip install kaggle
+          python -m pip show kaggle > run/kaggle_client_version.txt
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data={'id':os.environ['KAGGLE_USERNAME']+'/qas-p-v382-prospective-locked24','title':'QAS-C QAS-PC v3.8.2 LOCKED24 prospective','code_file':'run_qas_v382.py','language':'python','kernel_type':'script','is_private':True,'enable_gpu':True,'enable_internet':True,'dataset_sources':[],'competition_sources':[],'kernel_sources':[]}
+          Path('run/kernel-metadata.json').write_text(json.dumps(data,indent=2))
+          PY
+      - name: Submit one private campaign without changing frozen science
+        if: steps.credentials.outputs.available == 'true'
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          kaggle kernels push -p run > run/submission_response.txt
+          printf '%s\n' '{"status":"SUBMISSION_ACCEPTED_EXECUTION_UNVERIFIED","gpu_campaign_launched":null}' > run/execution_state.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qas-v382-verified-recovery
+          path: |
+            run/frozen_notebook.ipynb
+            run/run_qas_v382.py
+            run/recovery_receipt.json
+            run/credential_receipt.json
+            run/execution_state.json
+            run/submission_response.txt
+            run/kaggle_client_version.txt
+          if-no-files-found: error
+          retention-days: 30
