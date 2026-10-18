@@ -15,4 +15,4 @@ CFL
 
 The material release contains exact historical source packages, audit receipts, canonical schemas, a fail-closed reference validator and a prospective preregistration. It does not claim that the prospective router has already been validated.
 
-Local release SHA-256: `4f9201bb298b42446b41f9c0514b8c3793949f690c9a1c977c45177fce81c3aa`.
+Local release SHA-256: `e8b59c6b6b7dc09f6c47e517bab422534f91ac51a1fdfc6cbc37517dc8d4d807`.
