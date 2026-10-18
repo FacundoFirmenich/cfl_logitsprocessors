@@ -1,0 +1,12 @@
+claim_id,claim,evidence_level,state,source,ceiling
+C-RDSS240-EXEC,240 unique candidate cells executed end-to-end,E1_PRIMARY,VERIFIED,MERGED_COMPLETE_240_FINAL,Operational/mechanistic only; no semantic promotion
+C-RDSS240-TOP1,All 240 rows have zero post-projection flips,E1_PRIMARY,VERIFIED,candidate_results.csv,Top-1 preservation only
+C-ACTION-QUOTIENT,talm_right_high and talon_head_right are final-text equivalent in 54/54 units,E1_PRIMARY,VERIFIED,candidate_results.csv,Campaign/operator-specific equivalence
+C-PROBE-DISTINCTION,The same pair remains probe-distinct,E1_PRIMARY_DERIVED,VERIFIED,probe JSONs,Probe metrics are not semantic utility
+C-CPU-REBUILD,378-row reconstruction joins historical and G0 without regeneration,E3_DERIVED,VERIFIED,CPU rebuild,Not original generation
+C-ROUTER-FROZEN,Frozen historical router underperforms baseline by -0.005208 mean,E3_DERIVED,VERIFIED,CPU interpretation,Legacy contract score only
+C-PREFILL-NONID,Static prompt-action prefill representation fails deterministic exact-vector identification in 33 local classes,E3_DERIVED,VERIFIED,prefill resolution,Finite observed cells; not all future policies
+C-LOCAL-GRAPH,Local graph has 378 nodes and 2268 relations,E3_DERIVED,VERIFIED,local graph,Four legacy Boolean components only
+C-STAGE-SOFTWARE,Stage-local analyzer passes 17 tests + 10 subtests,E2_SOFTWARE,VERIFIED,stage local,Real tensor scientific run remains open
+C-DIRECTCOMP-SURFACE,No selected CI-supported CFL win in DIRECTCOMP surface aristas,E3_REFERENCED,SUPPORTED_NOT_REPRODUCED,superaudit/local tables,Raw 480 outputs not mounted
+C-RDS35-QAS,"RDS v3.5 reports 252 rows, 96/96 exact full-QAS and 70 non-vacuous",E1_ATTESTED,SUPPORTED_BYTES_MISSING,test log/evidence graph,Full primary bundle not mounted
