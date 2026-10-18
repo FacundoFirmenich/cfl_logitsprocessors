@@ -1,0 +1,43 @@
+name: R3 public assets for offline reference execution
+on:
+  push:
+    branches: [exec/kwan-r3-20261018]
+    paths: [.github/workflows/public-assets-offline-r3.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Download public reference model and CPU-compatible Python wheels
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public_assets/wheels
+          python -m pip install huggingface_hub
+          python - <<'PY'
+          from huggingface_hub import HfApi,snapshot_download
+          import pathlib,json,hashlib
+          model='Qwen/Qwen2.5-0.5B-Instruct'
+          rev=HfApi().model_info(model).sha
+          path=snapshot_download(model,revision=rev,cache_dir='public_assets/hf_cache',allow_patterns=['*.json','*.safetensors','*.txt','LICENSE','README.md'])
+          root=pathlib.Path('public_assets')
+          files={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file() and '.locks' not in p.parts}
+          root.joinpath('MODEL_MANIFEST.json').write_text(json.dumps({'model_id':model,'revision':rev,'snapshot':path,'purpose':'PUBLIC_MODEL_TRANSPORT_ONLY_NO_INFERENCE','sha256':files},indent=2))
+          print(model,rev,path)
+          PY
+          python -m pip download --only-binary=:all: --no-deps --dest public_assets/wheels 'transformers==5.20.1' 'accelerate==1.15.0' 'huggingface_hub==2.2.0' 'tokenizers==0.23.3' 'safetensors==0.8.0' 'sentencepiece==0.2.2' 'numpy==2.4.6' 'pillow==12.3.0' 'annotated-doc==0.0.5' 'anyio==4.15.1' 'click==8.5.0' 'filelock==3.32.3' 'fsspec==2026.7.0' 'h11==0.16.0' 'hf-xet==1.7.0' 'httpcore2==2.13.1' 'httpx2==2.13.1' 'idna==3.20' 'Jinja2==3.1.6' 'markdown-it-py==4.2.0' 'MarkupSafe==3.0.3' 'mdurl==0.1.2' 'packaging==26.3' 'psutil==7.2.2' 'Pygments==2.21.0' 'PyYAML==6.0.3' 'regex==2026.9.29' 'rich==15.0.0' 'shellingham==1.5.4' 'tqdm==4.70.1' 'truststore==0.10.5' 'typer==0.27.3' 'typing_extensions==4.16.0'
+          find public_assets -type f -not -path '*/.locks/*' -exec sha256sum '{}' ';' > public_assets/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KWAN-R3-public-reference-assets-${{ github.run_id }}
+          path: public_assets
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
