@@ -1,0 +1,134 @@
+name: KWAN R3 real execution
+on:
+  push:
+    branches: [exec/kwan-r3-20261018]
+    paths: [.github/workflows/kwan-r3-execution.yml, execution_r3/**]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lean-kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile original R2 core-only theorem in Lean 4.19.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/lean
+          cat > results/lean/Identifiability.lean <<'LEAN'
+          import Init
+          /- New core-only formalization; not a replacement of the original Mathlib file.
+             Status: SOURCE_COMPLETE_NOT_COMPILED_IN_THIS_RUNTIME.
+             No admitted theorem or placeholder proof is used. -/
+          namespace KwanBIFM
+          variable {M Y Q : Type}
+          def Identifiable (O : M → Y) (q : M → Q) : Prop :=
+            ∀ a b, O a = O b → q a = q b
+          
+          def ImageOf (O : M → Y) := { y : Y // ∃ m : M, O m = y }
+          def observeImage (O : M → Y) (m : M) : ImageOf O := ⟨O m, m, rfl⟩
+          
+          theorem factor_on_observed_image (O : M → Y) (q : M → Q) :
+              Identifiable O q ↔ ∃ g : ImageOf O → Q, ∀ m, g (observeImage O m) = q m := by
+            constructor
+            · intro h
+              classical
+              let g : ImageOf O → Q := fun y => q (Classical.choose y.property)
+              refine ⟨g, ?_⟩
+              intro m
+              exact h _ m (Classical.choose_spec (observeImage O m).property)
+            · intro h
+              cases h with
+              | intro g hg =>
+                intro a b hab
+                have hi : observeImage O a = observeImage O b := Subtype.ext hab
+                calc
+                  q a = g (observeImage O a) := (hg a).symm
+                  _ = g (observeImage O b) := congrArg g hi
+                  _ = q b := hg b
+          
+          theorem collision_excludes_factor (O : M → Y) (q : M → Q) (a b : M)
+              (same : O a = O b) (different : q a ≠ q b) : ¬ Identifiable O q := by
+            intro h
+            exact different (h a b same)
+          end KwanBIFM
+          #print axioms KwanBIFM.factor_on_observed_image
+          #print axioms KwanBIFM.collision_excludes_factor
+          LEAN
+          curl --fail --location --retry 3 https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-linux.tar.zst -o lean.tar.zst
+          sha256sum lean.tar.zst > results/lean/distribution.sha256
+          tar --zstd -xf lean.tar.zst
+          ./lean-4.19.0-linux/bin/lean --version | tee results/lean/version.txt
+          ./lean-4.19.0-linux/bin/lean -o results/lean/Identifiability.olean results/lean/Identifiability.lean 2>&1 | tee results/lean/kernel.log
+          sha256sum results/lean/Identifiability.lean results/lean/Identifiability.olean > results/lean/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KWAN-R3-Lean-${{ github.run_id }}
+          path: results/lean
+          retention-days: 30
+  real-model-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      OMP_NUM_THREADS: '4'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/model
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install 'transformers>=5.10.0,<6' accelerate safetensors sentencepiece pillow
+          python -m pip freeze > results/model/requirements-resolved.txt
+      - name: Actual Qwen3.5-2B inference and exact same-seed repeatability
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -u - <<'PY' 2>&1 | tee results/model/execution.log
+          import json,time,hashlib,platform,pathlib,random
+          import torch,numpy as np,transformers
+          from huggingface_hub import HfApi
+          from transformers import AutoProcessor,AutoModelForMultimodalLM
+          root=pathlib.Path('results/model')
+          model_id='Qwen/Qwen3.5-2B'
+          revision=HfApi().model_info(model_id).sha
+          if not revision: raise RuntimeError('UNPINNED_MODEL')
+          prompt='Explain why lower output entropy does not prove higher answer quality.'
+          manifest={'purpose':'ENGINEERING_REAL_MODEL_PREFLIGHT_NOT_OMEGA_A_OR_B','model_id':model_id,'revision':revision,'prompt':prompt,'transformers':transformers.__version__,'torch':torch.__version__,'device':'cpu','platform':platform.platform(),'max_new_tokens':96,'temperature':0.8,'top_p':0.9,'top_k':0,'seeds':[103001,103001,5103001],'claims_quality':False}
+          (root/'MANIFEST.json').write_text(json.dumps(manifest,indent=2))
+          torch.set_num_threads(4)
+          processor=AutoProcessor.from_pretrained(model_id,revision=revision)
+          model=AutoModelForMultimodalLM.from_pretrained(model_id,revision=revision,dtype='auto',device_map='cpu')
+          model.eval()
+          messages=[{'role':'user','content':[{'type':'text','text':prompt}]}]
+          inputs=processor.apply_chat_template(messages,tokenize=True,add_generation_prompt=True,return_dict=True,return_tensors='pt').to(model.device)
+          records=[]
+          for i,seed in enumerate(manifest['seeds']):
+              random.seed(seed);np.random.seed(seed);torch.manual_seed(seed)
+              started=time.monotonic()
+              with torch.inference_mode():
+                  out=model.generate(**inputs,max_new_tokens=96,do_sample=True,temperature=0.8,top_p=0.9,top_k=0,repetition_penalty=1.0,no_repeat_ngram_size=0,num_beams=1,use_cache=True)
+              ids=out[0][inputs['input_ids'].shape[-1]:].tolist()
+              row={'index':i,'seed':seed,'token_ids':ids,'text':processor.decode(ids,skip_special_tokens=True),'elapsed_seconds':time.monotonic()-started}
+              records.append(row)
+              with (root/'generations.jsonl').open('a') as f:f.write(json.dumps(row)+'\n')
+              print(json.dumps({'completed':i+1,'tokens':len(ids),'elapsed_seconds':row['elapsed_seconds']}),flush=True)
+          same=records[0]['token_ids']==records[1]['token_ids']
+          (root/'RESULT.json').write_text(json.dumps({'new_model_generations':len(records),'same_seed_equal':same,'reseed_equal':records[0]['token_ids']==records[2]['token_ids'],'scope':'PREFLIGHT_ONLY_NOT_OPERATOR_EFFICACY'},indent=2))
+          if not same: raise RuntimeError('SAME_SEED_NONDETERMINISM')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KWAN-R3-RealModel-${{ github.run_id }}
+          path: results/model
+          retention-days: 30
